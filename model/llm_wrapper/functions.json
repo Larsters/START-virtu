@@ -1,0 +1,57 @@
+[
+    {
+      "name": "calculate_heat_stress",
+      "description": "Calculate heat stress for crops based on daily maximum temperature",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "TMAX": {
+            "type": "number",
+            "description": "Daily maximum air temperature (°C)"
+          },
+          "TMaxOptimum": {
+            "type": "number",
+            "description": "Optimal maximum temperature for crop growth (°C)"
+          },
+          "TMaxLimit": {
+            "type": "number",
+            "description": "Maximum temperature limit for crop growth (°C)"
+          }
+        },
+        "required": ["TMAX", "TMaxOptimum", "TMaxLimit"]
+      }
+    },
+    {
+      "name": "calculate_drought_index",
+      "description": "Calculate drought index based on rainfall, evapotranspiration, soil moisture, and average temperature",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "Precipitation": {"type": "number", "description": "Cumulative rainfall (mm)"},
+          "Evapotranspiration": {"type": "number", "description": "Cumulative evapotranspiration (mm)"},
+          "SoilMoisture": {"type": "number", "description": "Soil moisture content"},
+          "TAVG": {"type": "number", "description": "Average temperature (°C)"}
+        },
+        "required": ["Precipitation", "Evapotranspiration", "SoilMoisture", "TAVG"]
+      }
+    },
+    {
+      "name": "calculate_yield_risk",
+      "description": "Compute yield risk based on crop parameters",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "crop_type": {
+            "type": "string",
+            "enum": ["Soybean", "Corn", "Cotton"],
+            "description": "Type of crop being evaluated"
+          },
+          "GDD": {"type": "number", "description": "Actual Growing Degree Days"},
+          "Precipitation": {"type": "number", "description": "Actual rainfall (mm)"},
+          "pH": {"type": "number", "description": "Actual soil pH"},
+          "N_Actual": {"type": "number", "description": "Actual available nitrogen (g/kg)"}
+        },
+        "required": ["crop_type", "GDD", "Precipitation", "pH", "N_Actual"]
+      }
+    }
+  ]
