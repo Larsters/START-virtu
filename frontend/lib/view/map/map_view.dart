@@ -7,14 +7,14 @@ import 'package:frontend/map/map_controller.dart';
 import 'package:maplibre/maplibre.dart';
 
 @immutable
-class MyMapWidget extends StatefulWidget {
-  const MyMapWidget({super.key});
+class MapView extends StatefulWidget {
+  const MapView({super.key});
 
   @override
-  State<MyMapWidget> createState() => _MyMapWidget();
+  State<MapView> createState() => _MyMapWidget();
 }
 
-class _MyMapWidget extends State<MyMapWidget> {
+class _MyMapWidget extends State<MapView> {
   // Using this field to store the widget state
   MapController? _mapController;
 
@@ -30,7 +30,7 @@ class _MyMapWidget extends State<MyMapWidget> {
 
   Future<void> _addCustomImage(StyleController styleController) async {
     try {
-      final ByteData data = await rootBundle.load('images/farm.png'); // Load from assets
+      final ByteData data = await rootBundle.load('assets/images/farm.png'); // Load from assets
       final Uint8List imageData = data.buffer.asUint8List();
 
       // Ensure `addImage` is awaited
