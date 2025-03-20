@@ -41,7 +41,9 @@ class AppStartupRouter extends StatelessWidget {
         }
 
         final hasCompletedSurvey = snapshot.data ?? false;
-        return hasCompletedSurvey ? const MapView() : const WelcomeSurveyView();
+        return hasCompletedSurvey
+            ? MapView() // Using corn as an example
+            : const WelcomeSurveyView();
       },
     );
   }
