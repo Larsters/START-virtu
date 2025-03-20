@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/map/map_view.dart';
 import 'package:frontend/services/preferences_manager.dart';
 import 'package:frontend/theme/app_theme.dart';
+import 'package:frontend/view/home/home_view.dart';
 import 'package:frontend/view/welcome_survey/welcome_survey_view.dart';
 
 void main() {
@@ -42,7 +42,7 @@ class AppStartupRouter extends StatelessWidget {
 
         final hasCompletedSurvey = snapshot.data ?? false;
         return hasCompletedSurvey
-            ? MapView() // Using corn as an example
+            ? const HomeView()
             : const WelcomeSurveyView();
       },
     );
