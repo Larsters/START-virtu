@@ -53,8 +53,3 @@ class MeteoblueQuery:
                 code_dict
             ]
         })
-        # self.body["queries"][0]["domain"] = domain
-        # self.body["queries"][0]["timeResolution"] = time_resolution
-        # self.body["queries"][0]["codes"][0]["code"] = code
-        # self.body["queries"][0]["codes"][0]["level"] = level
-        # self.body["queries"][0]["codes"][0]["aggregation"] = aggregation
