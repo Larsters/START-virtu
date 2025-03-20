@@ -15,6 +15,15 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.ext.kotlin_version = '1.6.10'
+
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
