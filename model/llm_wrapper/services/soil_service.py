@@ -1,11 +1,68 @@
 import requests
+from meteoblue_model import MeteoblueQuery
+from datetime import datetime, timedelta
+import os
 
-"""
-Fetch soil pH, N, etc
-"""
+
 def fetch_soil_data(latitude, longitude):
-        return {
-        "pH": data["pH"],
-        "N_Actual": data["N"],  
-        "other_info": data.get("extra_stuff and things", {})
+    """
+    Input arguments: latitude, longitude
+    Output dictionary: {
+        "soil_moisture": float,
+        "soil_ph": float,
+        "soil_nitrogen_content": float
     }
+    """
+    query = MeteoblueQuery()
+    query.set_coordinates(latitude=latitude, longitude=longitude)
+    query.set_time_interval(
+        start=datetime.now() - timedelta(days=1), end=datetime.now()
+    )
+    query.add_query(
+        domain="SOILGRIDS1000",
+        gap_fill_domain="NEMSGLOBAL",
+        time_resolution="static",
+        code_dict={"code": 800, "level": "0 cm"},
+    )
+    query.add_query(
+        domain="SOILGRIDS",
+        gap_fill_domain="NEMSGLOBAL",
+        time_resolution="static",
+        code_dict={
+            "code": 812,
+            "level": "aggregated",
+            "startDepth": 0,
+            "endDepth": 150,
+        },
+    )
+    query.add_query(
+        domain="SOILGRIDS2",
+        gap_fill_domain="NEMSGLOBAL",
+        time_resolution="static",
+        code_dict={
+            "code": 817,
+            "level": "aggregated",
+            "startDepth": 0,
+            "endDepth": 150,
+        },
+    )
+    response = get_query(query)
+    parsed = {
+        "soil_moisture": response[0]["codes"][0]["dataPerTimeInterval"][0]["data"][0],
+        "soil_ph": response[1]["codes"][0]["dataPerTimeInterval"][0]["data"][0],
+        "soil_nitrogen_content": response[2]["codes"][0]["dataPerTimeInterval"][0][
+            "data"
+        ][0],
+    }
+    print(parsed)
+    return response
+
+
+def get_query(query):
+    response = requests.post(
+        # url=f"https://my.meteoblue.com/dataset/query?apikey={os.getenv("WEATHER_API_KEY")}", # TODO - FINISH
+        url=f"https://my.meteoblue.com/dataset/query?apikey=52g435398254",  # TODO - FINISH
+        json=query.body,
+        headers={"Content-Type": "application/json"},
+    )
+    return response.json()
