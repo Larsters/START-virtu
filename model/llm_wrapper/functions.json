@@ -55,6 +55,28 @@
       }
     },
     {
+        "name": "fetch_weather_daily_data",
+        "description": "Fetch daily forecast data for the specified latitude/longitude.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "description": "Latitude of the location"
+            },
+            "longitude": {
+              "type": "number",
+              "description": "Longitude of the location"
+            },
+            "days": {
+              "type": "number",
+              "description": "Number of days to forecast"
+            }
+          },
+          "required": ["latitude", "longitude"]
+        }
+      },
+    {
         "name": "recommend_fertilizer",
         "description": "Recommend fertilizer or biosimulant based on yield risk and other conditions.",
         "parameters": {
