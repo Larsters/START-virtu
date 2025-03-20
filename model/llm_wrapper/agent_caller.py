@@ -4,12 +4,23 @@ import argparse
 from pathlib import Path
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
+from services.weather_service import fetch_historical_weather
+from services.soil_service import fetch_soil_data
+from domain_logic.calculations import calculate_gdd, calculate_yield_risk
+from domain_logic.recommendations import recommend_fertilizer
+
 
 class LLMAgent:
     def __init__(self):
         load_dotenv()
-        self.llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0)
-        self.functions = self._load_functions()
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            raise ValueError("No API key found in environment variables")
+        try:
+            self.llm = ChatOpenAI(api_key=api_key, model="gpt-3.5-turbo-16k", temperature=0)
+            self.functions = self._load_functions()
+        except Exception as e:
+            raise Exception(f"Failed to initialize LLM: {str(e)}")
     
     def _load_functions(self):
         current_dir = Path(__file__).parent

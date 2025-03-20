@@ -53,5 +53,19 @@
         },
         "required": ["crop_type", "GDD", "Precipitation", "pH", "N_Actual"]
       }
-    }
+    },
+    {
+        "name": "recommend_fertilizer",
+        "description": "Recommend fertilizer or biosimulant based on yield risk and other conditions.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "crop_type": {"type": "string"},
+            "yield_risk": {"type": "number"},
+            "pH": {"type": "number"},
+            "N_Actual": {"type": "number"}
+          },
+          "required": ["crop_type", "yield_risk", "pH", "N_Actual"]
+        }
+      }
   ]
