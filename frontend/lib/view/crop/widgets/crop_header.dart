@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../welcome_survey/models/crops.dart';
+import 'package:frontend/view/welcome_survey/models/crops.dart';
 
 class CropHeader extends StatelessWidget {
   final Crops crop;

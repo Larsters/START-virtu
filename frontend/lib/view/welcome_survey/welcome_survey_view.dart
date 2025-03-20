@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:frontend/map/map_view.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/theme/constants.dart';
+import 'package:frontend/view/welcome_survey/models/crops.dart';
+import 'package:frontend/view/welcome_survey/models/farm_location.dart';
+import 'package:frontend/view/welcome_survey/welcome_survey_controller.dart';
 import 'package:provider/provider.dart';
-
-import 'models/crops.dart';
-import 'models/farm_location.dart';
-import 'welcome_survey_controller.dart';
 
 class WelcomeSurveyView extends StatelessWidget {
   const WelcomeSurveyView({super.key});

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/view/crop/crop_controller.dart';
 import 'package:provider/provider.dart';
-
-import '../crop_controller.dart';
 
 class CropStatistics extends StatelessWidget {
   const CropStatistics({super.key});

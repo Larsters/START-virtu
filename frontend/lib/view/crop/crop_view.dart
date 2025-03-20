@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/view/crop/crop_controller.dart';
+import 'package:frontend/view/crop/widgets/crop_header.dart';
+import 'package:frontend/view/crop/widgets/crop_product_recommendations.dart';
+import 'package:frontend/view/crop/widgets/crop_statistics.dart';
 import 'package:frontend/view/welcome_survey/models/crops.dart';
 import 'package:provider/provider.dart';
-
-import 'crop_controller.dart';
-import 'widgets/crop_header.dart';
-import 'widgets/crop_product_recommendations.dart';
-import 'widgets/crop_statistics.dart';
 
 class CropView extends StatelessWidget {
   final Crops crop;

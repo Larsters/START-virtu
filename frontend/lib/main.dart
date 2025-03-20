@@ -48,4 +48,3 @@ class AppStartupRouter extends StatelessWidget {
     );
   }
 }
-
