@@ -2,10 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:frontend/view/welcome_survey/models/crops.dart';
+import 'package:frontend/view/welcome_survey/models/farm_location.dart';
 import 'package:path_provider/path_provider.dart';
-
-import '../welcome_survey/models/crops.dart';
-import '../welcome_survey/models/farm_location.dart';
 
 class AppDataManager {
   static const String _fileName = 'app_data.json';

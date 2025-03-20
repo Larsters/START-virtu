@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/theme/app_widget_themes.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import 'app_widget_themes.dart';
 
 class AppTheme {
   // Main Colors

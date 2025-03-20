@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import 'app_theme.dart';
-import 'constants.dart';
+import 'package:frontend/theme/app_theme.dart';
+import 'package:frontend/theme/constants.dart';
 
 class AppWidgetThemes {
   // Button Themes
