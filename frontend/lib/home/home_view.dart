@@ -20,8 +20,8 @@ class HomeView extends StatelessWidget {
                   MaterialPageRoute<void>(
                     builder:
                         (context) => ChangeNotifierProvider(
-                          create: (_) => MapController(),
-                          child: const MapView(),
+                          create: (_) => LocationController(),
+                          child: const MyMapWidget(),
                         ),
                   ),
                 );

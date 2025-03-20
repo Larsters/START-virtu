@@ -1,84 +1,86 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:location/location.dart';
-import 'package:mapbox_gl/mapbox_gl.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:frontend/map/map_controller.dart';
+import 'package:maplibre/maplibre.dart';
 
-/// Only view elements of the map view
-class MapView extends StatelessWidget {
-  const MapView({super.key});
+@immutable
+class MyMapWidget extends StatefulWidget {
+  const MyMapWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-  return MaterialApp(
-  debugShowCheckedModeBanner: false,
-  title: 'MapBox Example',
-  home: MapScreen(),
-  );
-  }
-  }
+  State<MyMapWidget> createState() => _MyMapWidget();
+}
 
-  class MapScreen extends StatefulWidget {
-  @override
-  _MapScreenState createState() => _MapScreenState();
-  }
-
-  class _MapScreenState extends State<MapScreen> {
-  MapboxMapController? mapController;
-  LatLng? currentLocation;
-  final String mapboxAccessToken = 'YOUR_MAPBOX_ACCESS_TOKEN_HERE';  // Replace this with your own token
+class _MyMapWidget extends State<MyMapWidget> {
+  // Using this field to store the widget state
+  bool _gesturesEnabed = true;
+  final LocationController _controller = LocationController();
+  Position? _currentPosition;
+  final List<Widget> _markers = [];
 
   @override
   void initState() {
-  super.initState();
-  _getCurrentLocation(); // Get user's location when the app starts
+    super.initState();
+    _loadCurrentPosition();
   }
 
-  /// Function to get the user's location
-  Future<void> _getCurrentLocation() async {
-  // Request permission for location
-  var status = await Permission.location.request();
-
-  if (status.isGranted) {
-  Location location = Location();
-  var userLocation = await location.getLocation();
-
-  setState(() {
-  currentLocation = LatLng(userLocation.latitude!, userLocation.longitude!);
-  });
-
-  // Move the map to the user's location
-  if (mapController != null) {
-  mapController!.animateCamera(CameraUpdate.newLatLng(currentLocation!));
-  }
-  } else {
-  print('Location permission denied');
-  }
+  Future<void> _loadCurrentPosition() async {
+    try {
+      final position = await _controller.getCurrentPosition();
+      setState(() {
+        _currentPosition = position;
+      });
+    } catch (e) {
+      // Handle error - maybe show a dialog to the user
+      print('Error getting location: $e');
+    }
   }
 
-  /// Callback when the map is created
-  void _onMapCreated(MapboxMapController controller) {
-  mapController = controller;
-  if (currentLocation != null) {
-  mapController!.animateCamera(CameraUpdate.newLatLng(currentLocation!));
-  }
+  void _addMarker(Position position) {
+    setState(() {
+      _markers.add(
+        Container(
+          color: Colors.red,
+          width: 50,
+          height: 50,
+        ),
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-  return Scaffold(
-  appBar: AppBar(title: Text('MapBox Example')),
-  body: currentLocation == null
-  ? Center(child: CircularProgressIndicator())  // Show loading until location is found
-      : MapboxMap(
-  accessToken: mapboxAccessToken,
-  onMapCreated: _onMapCreated,
-  initialCameraPosition: CameraPosition(
-  target: currentLocation!,
-  zoom: 14.0,
-  ),
-  myLocationEnabled: true,
-  myLocationTrackingMode: MyLocationTrackingMode.TrackingGPS,
-  ),
-  );
+    if (_currentPosition == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Scaffold(
+      body: MapLibreMap(
+          options: MapOptions(
+            initCenter: _currentPosition!,
+            initZoom: 15, // Zooming in more since we're showing user's location
+            initStyle: 'https://tiles.openfreemap.org/styles/liberty',
+            gestures: _gesturesEnabed ? MapGestures.all() : MapGestures.none(),
+          ),
+          children: _markers,
+          onEvent: (event) {
+            if (event case MapEventClick()) {
+              setState(() {
+                _gesturesEnabed = !_gesturesEnabed;
+              });
+            } else if (event case MapEventLongPress(:final position)) {
+              _addMarker(position);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Marker added at: ${position.latitude.toStringAsFixed(6)}, ${position.longitude.toStringAsFixed(6)}',
+                  ),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          }
+      ),
+    );
   }
-  }
+}
