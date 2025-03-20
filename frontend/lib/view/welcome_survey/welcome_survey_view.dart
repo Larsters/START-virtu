@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/map/map_view.dart';
+import 'package:frontend/view/map/map_view.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/theme/constants.dart';
 import 'package:frontend/view/welcome_survey/models/crops.dart';
