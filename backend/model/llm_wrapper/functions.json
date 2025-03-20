@@ -89,5 +89,28 @@
           },
           "required": ["crop_type", "yield_risk", "pH", "N_Actual"]
         }
+      },
+      {
+        "name": "predict_future_weather",
+        "description": "Predict weather for a future date based on historical patterns and current conditions",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "description": "Latitude of the location"
+            },
+            "longitude": {
+              "type": "number",
+              "description": "Longitude of the location"
+            },
+            "days_ahead": {
+              "type": "integer",
+              "description": "Number of days in the future to predict (1-14)"
+            }
+          },
+          "required": ["latitude", "longitude", "days_ahead"]
+        }
       }
+      
   ]

@@ -25,3 +25,8 @@ python3 agent_caller.py --message "What's the drought index when precipitation i
 ```python
 python3 agent_caller.py --message "Calculate yield risk for cotton with GDD of 2300, precipitation of 950mm, pH of 6.0, and nitrogen content of 0.07 g/kg"
 ```
+
+## Calculate weather prediction with AI agents
+```python
+python agent_caller.py --test predict_weather --args '{"latitude": 40.7128, "longitude": -74.0060, "days_ahead": 10}'
+```

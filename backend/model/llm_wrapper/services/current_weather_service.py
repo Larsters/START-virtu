@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timedelta
 import os
 
-from meteoblue_model import MeteoblueQuery
+from .meteoblue_model import MeteoblueQuery
 
 url_cehub = "https://services.cehub.syngenta-ais.com/api"
 url_meteoblue = "https://my.meteoblue.com/dataset/query?apikey"
