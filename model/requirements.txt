@@ -1,7 +1,0 @@
-requests
-numpy
-pandas
-catboost
-sklearn
-langchain
-langchain_openai
