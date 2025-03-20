@@ -1,5 +1,7 @@
 model/data/
 model/data/*
 model/data/brazil-states.geojson
-.env
 model/llm_wrapper/.env
+.env
+**/.env
+**/env/
