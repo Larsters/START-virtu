@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:frontend/map/map_controller.dart';
 import 'package:maplibre/maplibre.dart';
 
@@ -13,16 +16,32 @@ class MyMapWidget extends StatefulWidget {
 
 class _MyMapWidget extends State<MyMapWidget> {
   // Using this field to store the widget state
-  bool _gesturesEnabed = true;
+  MapController? _mapController;
+
   final LocationController _controller = LocationController();
   Position? _currentPosition;
-  final List<Widget> _markers = [];
+  final List<Point> _markersPoints = [];
 
   @override
   void initState() {
     super.initState();
     _loadCurrentPosition();
   }
+
+  Future<void> _addCustomImage(StyleController styleController) async {
+    try {
+      final ByteData data = await rootBundle.load('images/farm.png'); // Load from assets
+      final Uint8List imageData = data.buffer.asUint8List();
+
+      // Ensure `addImage` is awaited
+      await styleController.addImage('custom-marker', imageData);
+
+      print('Custom image added successfully!');
+    } catch (e) {
+      print('Error adding image: $e');
+    }
+  }
+
 
   Future<void> _loadCurrentPosition() async {
     try {
@@ -38,13 +57,7 @@ class _MyMapWidget extends State<MyMapWidget> {
 
   void _addMarker(Position position) {
     setState(() {
-      _markers.add(
-        Container(
-          color: Colors.red,
-          width: 50,
-          height: 50,
-        ),
-      );
+      _markersPoints.add(Point(coordinates: position));
     });
   }
 
@@ -56,30 +69,44 @@ class _MyMapWidget extends State<MyMapWidget> {
 
     return Scaffold(
       body: MapLibreMap(
-          options: MapOptions(
-            initCenter: _currentPosition!,
-            initZoom: 15, // Zooming in more since we're showing user's location
-            initStyle: 'https://tiles.openfreemap.org/styles/liberty',
-            gestures: _gesturesEnabed ? MapGestures.all() : MapGestures.none(),
+        options: MapOptions(
+          initCenter: _currentPosition,
+          initZoom: 15, // Zooming in more since we're showing user's location
+          initStyle: 'https://tiles.openfreemap.org/styles/liberty',
+          gestures: MapGestures(
+            rotate: false,
+            pan: true,
+            zoom: true,
+            pitch: true,
           ),
-          children: _markers,
-          onEvent: (event) {
-            if (event case MapEventClick()) {
-              setState(() {
-                _gesturesEnabed = !_gesturesEnabed;
-              });
-            } else if (event case MapEventLongPress(:final position)) {
-              _addMarker(position);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Marker added at: ${position.latitude.toStringAsFixed(6)}, ${position.longitude.toStringAsFixed(6)}',
-                  ),
-                  duration: const Duration(seconds: 2),
+        ),
+        onMapCreated: (controller) {
+          _mapController = controller;
+        },
+        onStyleLoaded: (StyleController styleController) {
+          _addCustomImage(styleController);
+        },
+        layers: [
+          MarkerLayer(
+              points: _markersPoints,
+              iconSize: 0.5,  // Choose a size that works well for your use case
+              iconImage: 'custom-marker',
+          ),
+        ],
+        onEvent: (event) {
+          if (event case MapEventClick(:final point)) {
+            final position = Position(point.lng, point.lat);
+            _addMarker(position);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Marker added at: ${position.lat.toStringAsFixed(6)}, ${position.lng.toStringAsFixed(6)}',
                 ),
-              );
-            }
+                duration: const Duration(seconds: 2),
+              ),
+            );
           }
+        },
       ),
     );
   }
