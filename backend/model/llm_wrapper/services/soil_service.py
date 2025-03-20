@@ -1,5 +1,5 @@
 import requests
-from meteoblue_model import MeteoblueQuery
+from model.llm_wrapper.services.meteoblue_model import MeteoblueQuery
 from datetime import datetime, timedelta
 import os
 
@@ -48,19 +48,18 @@ def fetch_soil_data(latitude, longitude):
     )
     response = get_query(query)
     parsed = {
-        "soil_moisture": response[0]["codes"][0]["dataPerTimeInterval"][0]["data"][0],
-        "soil_ph": response[1]["codes"][0]["dataPerTimeInterval"][0]["data"][0],
+        "soil_moisture": response[0]["codes"][0]["dataPerTimeInterval"][0]["data"][0][0],
+        "soil_ph": response[1]["codes"][0]["dataPerTimeInterval"][0]["data"][0][0],
         "soil_nitrogen_content": response[2]["codes"][0]["dataPerTimeInterval"][0][
             "data"
-        ][0],
+        ][0][0],
     }
-    print(parsed)
-    return response
+    return parsed
 
 
 def get_query(query):
     response = requests.post(
-        url=f"https://my.meteoblue.com/dataset/query?apikey={os.getenv("WEATHER_API_KEY")}",
+        url=f"https://my.meteoblue.com/dataset/query?apikey={os.getenv('HISTORICAL_API_KEY')}",
         json=query.body,
         headers={"Content-Type": "application/json"},
     )

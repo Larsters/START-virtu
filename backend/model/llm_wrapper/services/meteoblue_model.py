@@ -9,10 +9,10 @@ class MeteoblueQuery:
         "geometry": {
             "type": "MultiPoint",
             "coordinates": [
-                 #[
+                [
                     # 106.8,
                     # 47.91
-                # ]
+                ]
             ],
             "locationNames": [""],
             "mode": "preferLandWithMatchingElevation",
@@ -39,7 +39,7 @@ class MeteoblueQuery:
     }
 
     def set_coordinates(self, latitude, longitude):
-        self.body["geometry"]["coordinates"][0] = [longitude, latitude]
+        self.body["geometry"]["coordinates"][0] = ([longitude, latitude])
 
     def set_time_interval(self, start, end):
         self.body["timeIntervals"] = [f"{start.strftime("%Y-%m-%d")}T+00:00/{end.strftime("%Y-%m-%d")}T+00:00"]
