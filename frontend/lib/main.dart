@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/map/map_view.dart';
 import 'package:frontend/services/preferences_manager.dart';
 import 'package:frontend/theme/app_theme.dart';
-import 'package:frontend/welcome_survey/welcome_survey_view.dart';
+import 'package:frontend/view/welcome_survey/welcome_survey_view.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +33,10 @@ class AppStartupRouter extends StatelessWidget {
       future: PreferencesManager().hasCompletedSurvey(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
+          ListTile(
+            leading: Image.asset('assets/images/logo.png'),
+            title: Text('Crop'),
+          );
           return const Center(child: CircularProgressIndicator());
         }
 

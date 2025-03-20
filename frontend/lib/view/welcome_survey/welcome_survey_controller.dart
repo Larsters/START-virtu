@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/services/app_data_manager.dart';
+import 'package:frontend/services/preferences_manager.dart';
 
-import '../services/app_data_manager.dart';
-import '../services/preferences_manager.dart';
 import 'models/crops.dart';
 import 'models/farm_location.dart';
 

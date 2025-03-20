@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/map/map_view.dart';
+import 'package:frontend/theme/app_theme.dart';
+import 'package:frontend/theme/constants.dart';
 import 'package:provider/provider.dart';
 
-import '../theme/app_theme.dart';
-import '../theme/constants.dart';
 import 'models/crops.dart';
 import 'models/farm_location.dart';
 import 'welcome_survey_controller.dart';
