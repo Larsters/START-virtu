@@ -4,10 +4,10 @@ import argparse
 from pathlib import Path
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
-from services.weather_service import fetch_historical_weather
-from services.soil_service import fetch_soil_data
-from domain_logic.calculations import calculate_gdd, calculate_yield_risk
-from domain_logic.recommendations import recommend_fertilizer
+#from services.weather_service import get_short_range_forecast
+# from services.soil_service import fetch_soil_data
+# from domain_logic.calculations import calculate_gdd, calculate_yield_risk
+# from domain_logic.recommendations import recommend_fertilizer
 
 
 class LLMAgent:
@@ -72,6 +72,7 @@ class LLMAgent:
             }
         return None
     
+ 
     def calculate_heat_stress(self, TMAX, TMIN=None, crop_type=None):
         # Default values based on crop type if provided
         crop_values = {

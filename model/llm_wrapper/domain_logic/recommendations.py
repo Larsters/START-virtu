@@ -4,7 +4,7 @@ def recommend_fertilizer(crop_type, yield_risk, pH, N_Actual):
     """
     product = None
     if yield_risk > 1000:
-        product = "Stress Buster"  # placeholder
+        product = "Stress Buster"  
     else:
         product = "Yield Booster"
     
