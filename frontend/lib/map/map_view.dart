@@ -1,21 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/map/map_controller.dart';
-import 'package:frontend/map/farm_widget.dart';
 import 'package:maplibre/maplibre.dart';
-import 'dart:math' as math;
-
-class Farm {
-  final Position position;
-  final SeedType seedType;
-  final double progress;
-
-  Farm({
-    required this.position,
-    required this.seedType,
-    required this.progress,
-  });
-}
 
 @immutable
 class MyMapWidget extends StatefulWidget {
@@ -30,9 +16,7 @@ class _MyMapWidget extends State<MyMapWidget> {
   bool _gesturesEnabed = true;
   final LocationController _controller = LocationController();
   Position? _currentPosition;
-  final List<Farm> _farms = [];
-  final _random = math.Random();
-  MapController? _mapController;
+  final List<Widget> _markers = [];
 
   @override
   void initState() {
@@ -52,35 +36,16 @@ class _MyMapWidget extends State<MyMapWidget> {
     }
   }
 
-  void _addFarm(Position position) {
-    final farm = Farm(
-      position: position,
-      seedType: SeedType.values[_random.nextInt(SeedType.values.length)],
-      progress: _random.nextDouble() * 100,
-    );
-
+  void _addMarker(Position position) {
     setState(() {
-      _farms.add(farm);
-    });
-  }
-
-  void _showFarmDetails(Farm farm, BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: FarmWidget(
-          seedType: farm.seedType,
-          progress: farm.progress,
-          color: Colors.green,
+      _markers.add(
+        Container(
+          color: Colors.red,
+          width: 50,
+          height: 50,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
+      );
+    });
   }
 
   @override
@@ -91,60 +56,30 @@ class _MyMapWidget extends State<MyMapWidget> {
 
     return Scaffold(
       body: MapLibreMap(
-        options: MapOptions(
-          initCenter: _currentPosition,
-          initZoom: 15,
-          initStyle: 'https://tiles.openfreemap.org/styles/liberty',
-          gestures: MapGestures(
-            rotate: false,
-            pan: true,
-            zoom: true,
-            pitch: true,
+          options: MapOptions(
+            initCenter: _currentPosition!,
+            initZoom: 15, // Zooming in more since we're showing user's location
+            initStyle: 'https://tiles.openfreemap.org/styles/liberty',
+            gestures: _gesturesEnabed ? MapGestures.all() : MapGestures.none(),
           ),
-        ),
-        onMapCreated: (controller) {
-          print('Map controller created');
-          _mapController = controller;
-        },
-        layers: [
-          CircleLayer(
-            points: _farms.map((farm) => Point(coordinates: farm.position)).toList(),
-            radius: 10,
-            color: Colors.red,
-            strokeWidth: 2,
-            strokeColor: Colors.white,
-          ),
-        ],
-        onEvent: (event) {
-          if (event case MapEventClick(:final point)) {
-            print('Map clicked at: $point');
-            // Check if we clicked near an existing farm
-            final clickedPosition = Position(point.lng, point.lat);
-            final nearbyFarm = _farms.cast<Farm?>().firstWhere(
-              (farm) {
-                final dx = farm!.position.lng - clickedPosition.lng;
-                final dy = farm.position.lat - clickedPosition.lat;
-                // Check if click is within 0.0001 degrees (roughly 10 meters)
-                return (dx * dx + dy * dy) < 0.0001 * 0.0001;
-              },
-              orElse: () => null,
-            );
-
-            if (nearbyFarm != null) {
-              _showFarmDetails(nearbyFarm, context);
-            } else {
-              _addFarm(clickedPosition);
+          children: _markers,
+          onEvent: (event) {
+            if (event case MapEventClick()) {
+              setState(() {
+                _gesturesEnabed = !_gesturesEnabed;
+              });
+            } else if (event case MapEventLongPress(:final position)) {
+              _addMarker(position);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'Farm added at: ${clickedPosition.lat.toStringAsFixed(6)}, ${clickedPosition.lng.toStringAsFixed(6)}',
+                    'Marker added at: ${position.latitude.toStringAsFixed(6)}, ${position.longitude.toStringAsFixed(6)}',
                   ),
                   duration: const Duration(seconds: 2),
                 ),
               );
             }
           }
-        },
       ),
     );
   }
