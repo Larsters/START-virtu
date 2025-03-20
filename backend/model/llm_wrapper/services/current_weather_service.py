@@ -3,25 +3,22 @@ import json
 from datetime import datetime, timedelta
 import os
 
-session = requests.Session()
-headers = {"Accept": "application/json"}
 url = "https://services.cehub.syngenta-ais.com/api"
-api_key = os.getenv('HISTORICAL_API_KEY')
 
 
 def get_current_weather(latitude, longitude):
     current_time = datetime.now()
-    end_time = current_time + timedelta(minutes=15)
+    end_time = current_time + timedelta(minutes=120)
 
-    response = session.get(
+    response = requests.get(
         f"{url}/Forecast/Nowcast"
         f"?latitude={latitude}"
         f"&longitude={longitude}"
         f"&startDate={current_time}"
         f"&endDate={end_time}"
-        f"&apikey={api_key}"
+        f"&apikey={os.getenv('WEATHER_API_KEY')}"
         f"&supplier=Meteoblue",
-        headers=headers,
+        headers={"Accept": "application/json"},
     )
 
     parsed = json.loads(response.content)
