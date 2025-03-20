@@ -8,11 +8,21 @@ class MapView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MapController controller = Provider.of<MapController>(context);
-
-    return Scaffold(
-      appBar: AppBar(title: Text('Map view')),
-      body: Center(child: Text('Holi ${controller.name}')),
+    return ChangeNotifierProvider(
+      create: (_) => MapController(),
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: Text('Map view'),
+        ),
+        body: Center(
+          child: Consumer<MapController>(
+            builder: (context, controller, _) {
+              return Text('Holi ${controller.name}');
+            },
+          ),
+        ),
+      ),
     );
   }
 }
