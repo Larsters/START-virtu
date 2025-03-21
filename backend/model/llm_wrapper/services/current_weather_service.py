@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timedelta
 import os
 
-from .meteoblue_model import MeteoblueQuery
+from model.llm_wrapper.services.meteoblue_model import MeteoblueQuery
 
 url_cehub = "https://services.cehub.syngenta-ais.com/api"
 url_meteoblue = "https://my.meteoblue.com/dataset/query?apikey"
@@ -288,3 +288,22 @@ def get_historical_weather_two_year_ago(latitude, longitude):
         print(f"Unexpected error: {e}")
     
     return data
+
+
+def get_cloudiness(latitude, longitude):
+    url = f"https://my.meteoblue.com/packages/current?lat={latitude}&lon={longitude}&apikey=hTxj19ptoyqAH5YF"
+    response = requests.get(url)
+    parsed = response.json()
+
+    match parsed["data_current"]["pictocode"]:  # sunny, cloudy, rainy, stormy
+        case 1 | 2 | 7 | 10:
+            return "sunny"
+        case 3 | 4 | 5:
+            return "cloudy"
+        case 17 | 15 | 13 | 11 | 9 | 8:
+            return "rainy"
+        case 16 | 14 | 12 | 14 | 16 | 6:
+            return "stormy"
+
+
+get_cloudiness(47.25, 45.26)
