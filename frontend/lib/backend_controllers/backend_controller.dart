@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:frontend/models/current_weather.dart';
+import 'package:frontend/models/risk_stats.dart';
 import 'package:frontend/models/soil_data.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
 
 class BackendController {
-  static final String baseUrl = 'https://localhost:8000';
+  static final String baseUrl = 'http://localhost:8000';
 
   BackendController();
 
@@ -108,6 +109,17 @@ class BackendController {
       'longitude': longitude
     });
     return CurrentWeather.fromJson(result);
+  }
+
+  static Future<RiskStats> getRiskStats(double latitude, double longitude, String crop) async {
+    BackendController backend = BackendController();
+
+    final result = await backend.get('getRiskStats', params:{
+      'latitude': latitude,
+      'longitude': longitude,
+      'crop': crop
+    });
+    return RiskStats.fromJson(result);
   }
 
 }
