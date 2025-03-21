@@ -19,13 +19,13 @@ WORST_YIELD_RISK = ">1000"
 
 
 def get_stats(latitude, longitude, crop_type):
-    daytime_heat_stress_risk = round(get_daytime_heat_stress_risk(
-        latitude, longitude, crop_type
-    ), 2)
+    daytime_heat_stress_risk = round(
+        get_daytime_heat_stress_risk(latitude, longitude, crop_type), 2
+    )
 
-    nighttime_heat_stress_risk = round(get_nighttime_heat_stress_risk(
-        latitude, longitude, crop_type
-    ), 2)
+    nighttime_heat_stress_risk = round(
+        get_nighttime_heat_stress_risk(latitude, longitude, crop_type), 2
+    )
 
     frost_stress = round(get_frost_stress(latitude, longitude, crop_type), 2)
 
@@ -38,33 +38,35 @@ def get_stats(latitude, longitude, crop_type):
             get_daytime_heat_stress_risk_level(daytime_heat_stress_risk),
             daytime_heat_stress_risk,
             OPTIMAL_DAYTIME_HEAT_STRESS_RISK,
-            WORST_DAYTIME_HEAT_STRESS_RISK
+            WORST_DAYTIME_HEAT_STRESS_RISK,
         ],
         "nighttime_heat_stress_risk": [
             get_nighttime_heat_stress_risk_level(nighttime_heat_stress_risk),
             nighttime_heat_stress_risk,
             OPTIMAL_NIGHTTIME_HEAT_STRESS_RISK,
-            WORST_NIGHTTIME_HEAT_STRESS_RISK
+            WORST_NIGHTTIME_HEAT_STRESS_RISK,
         ],
         "frost_stress": [
             get_frost_stress_risk_level(frost_stress),
             frost_stress,
             OPTIMAL_FROST_STRESS,
-            WORST_FROST_STRESS
+            WORST_FROST_STRESS,
         ],
         "drought_risk": [
             get_drought_risk_level(drought_risk),
             drought_risk,
             OPTIMAL_DROUGHT_RISK,
-            WORST_DROUGHT_RISK
+            WORST_DROUGHT_RISK,
         ],
         "yield_risk": [
             get_yield_risk_level(yield_risk),
             yield_risk,
             OPTIMAL_YIELD_RISK,
-            WORST_YIELD_RISK
+            WORST_YIELD_RISK,
         ],
     }
+
+    stats["recommended_products"] = get_recommended_products(stats)
 
     return stats
 
@@ -72,20 +74,17 @@ def get_stats(latitude, longitude, crop_type):
 def get_recommended_products(stats):
     recommended = []
     for key, value in stats.items():
-        if (
-            value[0] == "medium"
-            or value[0] == "high"
-            and key
-            in [
-                "daytime_heat_stress_risk",
-                "nighttime_heat_stress_risk",
-                "frost_stress",
-                "drought_risk",
-            ]
-        ):
+        if key in [
+            "daytime_heat_stress_risk",
+            "nighttime_heat_stress_risk",
+            "frost_stress",
+            "drought_risk",
+        ] and (value[0] == "medium" or value[0] == "high"):
             recommended.append("stress_buster")
-        if value[0] == "medium" or value[0] == "high" and key == "yield_risk":
+        print(key)
+        if key == "yield_risk" and (value[0] == "medium" or value[0] == "high"):
             recommended.append("yield_booster")
+    return recommended
 
 
 def get_daytime_heat_stress_risk_level(value):
