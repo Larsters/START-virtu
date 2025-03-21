@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
-from backend.model.llm_wrapper.domain_logic.calculations import calculate_daytime_heat_stress_risk, calculate_frost_stress, calculate_nighttime_heat_stress_risk, get_drought_risk, get_yield_risk
-from backend.model.llm_wrapper.services.soil_service import fetch_soil_data
+from model.llm_wrapper.domain_logic.calculations import calculate_daytime_heat_stress_risk, calculate_frost_stress, calculate_nighttime_heat_stress_risk, get_drought_risk, get_yield_risk
+from model.llm_wrapper.services.soil_service import fetch_soil_data
 
 def recommend_products(crop_type, weather_prediction, soil_data=None, latitude=None, longitude=None):
     """
