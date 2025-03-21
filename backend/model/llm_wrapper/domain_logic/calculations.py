@@ -6,7 +6,7 @@ from statistics import fmean
 import os
 
 
-def calculate_daytime_heat_stress_risk(latitude, longitude, crop_type):
+def get_daytime_heat_stress_risk(latitude, longitude, crop_type):
     t_max = get_daily_maximum_temperature(latitude, longitude)
     t_max_optimum, t_max_limit = get_daytime_optimum_limit_temperature_by_crop(
         crop_type
@@ -19,7 +19,7 @@ def calculate_daytime_heat_stress_risk(latitude, longitude, crop_type):
     return 9 * (t_max - t_max_optimum) / (t_max_limit - t_max_optimum)
 
 
-def calculate_nighttime_heat_stress_risk(latitude, longitude, crop_type):
+def get_nighttime_heat_stress_risk(latitude, longitude, crop_type):
     t_min = get_daily_minimum_temperature(latitude=latitude, longitude=longitude)
     t_min_optimum, t_min_limit = get_nighttime_optimum_limit_temperature_by_crop(
         crop_type
@@ -32,7 +32,7 @@ def calculate_nighttime_heat_stress_risk(latitude, longitude, crop_type):
     return 9 * (t_min - t_min_optimum) / (t_min_limit - t_min_optimum)
 
 
-def calculate_frost_stress(latitude, longitude, crop_type):
+def get_frost_stress(latitude, longitude, crop_type):
     t_min = get_daily_minimum_temperature(latitude=latitude, longitude=longitude)
     t_min_no_frost, t_min_frost = get_frost_minimum_temperatures_by_crop(crop_type)
     if t_min >= t_min_no_frost:
@@ -40,19 +40,6 @@ def calculate_frost_stress(latitude, longitude, crop_type):
     if t_min <= t_min_frost:
         return 9
     return 9 * abs(t_min - t_min_frost) / abs(t_min_frost - t_min_no_frost)
-
-
-def get_frost_minimum_temperatures_by_crop(crop_type):
-    """
-    Returns touple (t_min_no_frost, t_min_frost
-    """
-    match crop_type:
-        case "soybean":
-            return 4, -3
-        case "corn":
-            return 4, -3
-        case "cotton":
-            return 4, -3
 
 
 def get_drought_risk(latitude, longitude):
@@ -70,7 +57,7 @@ def get_drought_risk(latitude, longitude):
     return drought_index
 
 
-def get_yield_risk(latitude, longitude, start, end, crop_type):
+def get_yield_risk(latitude, longitude, crop_type, start=datetime.now() - timedelta(days=90), end=datetime.now()):
     growing_degree_days = get_growing_degree_days(latitude, longitude, start, end)
     cumulative_rainfall = get_cumulative_rainfall(latitude, longitude, start, end)
     soil_ph = get_soil_ph(latitude, longitude)
@@ -84,13 +71,26 @@ def get_yield_risk(latitude, longitude, start, end, crop_type):
 
     w1, w2, w3, w4 = 0.3, 0.3, 0.2, 0.2
 
-    yield_risk = (
+    yield_risk = abs(
         w1 * (growing_degree_days - optimal_growing_degree_days) * 2
         + w2 * (cumulative_rainfall - optimal_rainfall) * 2
         + w3 * (soil_ph - optimal_soil_ph) * 2
         + w4 * (soil_nitrogen - optimal_soil_nitrogen) * 2
     )
     return yield_risk
+
+
+def get_frost_minimum_temperatures_by_crop(crop_type):
+    """
+    Returns touple (t_min_no_frost, t_min_frost
+    """
+    match crop_type:
+        case "soybean":
+            return 4, -3
+        case "corn":
+            return 4, -3
+        case "cotton":
+            return 4, -3
 
 
 def get_yield_risk_optimal_numbers(crop_type):
@@ -193,7 +193,6 @@ def get_soil_moisture(latitude, longitude):
     Returns soil moisture in percentage
     """
     response = fetch_soil_data(latitude, longitude)
-    print(response)
     return response["soil_moisture"]
 
 
