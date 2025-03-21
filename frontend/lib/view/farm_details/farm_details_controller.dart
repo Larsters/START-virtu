@@ -190,7 +190,6 @@ class FarmDetailsController extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    try {
       // Fetch all data in parallel
       final results = await Future.wait([
         BackendController.getRiskStats(
@@ -214,12 +213,8 @@ class FarmDetailsController extends ChangeNotifier {
               .cast<Product>()
               .toList() ??
           [];
-    } catch (e) {
-      _error = 'Failed to fetch farm data: $e';
-    } finally {
       _isLoading = false;
       notifyListeners();
-    }
   }
 
   // Helper method to convert string to Product enum

@@ -36,31 +36,31 @@ def get_stats(latitude, longitude, crop_type):
     stats = {
         "daytime_heat_stress_risk": [
             get_daytime_heat_stress_risk_level(daytime_heat_stress_risk),
-            str(daytime_heat_stress_risk),
+            daytime_heat_stress_risk,
             OPTIMAL_DAYTIME_HEAT_STRESS_RISK,
             WORST_DAYTIME_HEAT_STRESS_RISK,
         ],
         "nighttime_heat_stress_risk": [
             get_nighttime_heat_stress_risk_level(nighttime_heat_stress_risk),
-            str(nighttime_heat_stress_risk),
+            nighttime_heat_stress_risk,
             OPTIMAL_NIGHTTIME_HEAT_STRESS_RISK,
             WORST_NIGHTTIME_HEAT_STRESS_RISK,
         ],
         "frost_stress": [
             get_frost_stress_risk_level(frost_stress),
-            str(frost_stress),
+            frost_stress,
             OPTIMAL_FROST_STRESS,
             WORST_FROST_STRESS,
         ],
         "drought_risk": [
             get_drought_risk_level(drought_risk),
-            str(drought_risk),
+            drought_risk,
             OPTIMAL_DROUGHT_RISK,
             WORST_DROUGHT_RISK,
         ],
         "yield_risk": [
             get_yield_risk_level(yield_risk),
-            str(yield_risk),
+            yield_risk,
             OPTIMAL_YIELD_RISK,
             WORST_YIELD_RISK,
         ],

@@ -12,9 +12,9 @@ class SoilData {
   // Factory constructor to create SoilData from JSON
   factory SoilData.fromJson(Map<String, dynamic> json) {
     return SoilData(
-      soilMoisture: double.tryParse(json['soil_moisture'] as String? ?? '0') ?? 0.0,
-      soilPh: double.tryParse(json['soil_ph'] as String? ?? '0') ?? 0.0,
-      soilNitrogenContent: double.tryParse(json['soil_nitrogen_content'] as String? ?? '0') ?? 0.0,
+      soilMoisture: json['soil_moisture'] as double? ?? 0.0,
+      soilPh: json['soil_ph'] as double? ?? 0.0,
+      soilNitrogenContent: json['soil_nitrogen_content'] as double? ?? 0.0,
     );
   }
 

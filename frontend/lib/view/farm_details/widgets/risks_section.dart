@@ -66,7 +66,7 @@ class RisksSection extends StatelessWidget {
         _RiskBar(
           label: 'Day Heat Stress',
           riskLevel: riskStats.getDayRiskLevel,
-          value: riskStats.getDayRiskValue.toDouble(),
+          value: riskStats.getDayRiskValue ?? 0.0,
           optimal: double.tryParse(riskStats.getDayRiskOptimal) ?? 0.0,
           worst: double.tryParse(riskStats.getDayRiskWorst) ?? 0.0,
         ),
@@ -74,7 +74,7 @@ class RisksSection extends StatelessWidget {
         _RiskBar(
           label: 'Night Heat Stress',
           riskLevel: riskStats.getNightRiskLevel,
-          value: riskStats.getNightRiskValue.toDouble(),
+          value: riskStats.getNightRiskValue ?? 0.0,
           optimal: double.tryParse(riskStats.getNightRiskOptimal) ?? 0.0,
           worst: double.tryParse(riskStats.getNightRiskWorst) ?? 0.0,
         ),
@@ -82,7 +82,7 @@ class RisksSection extends StatelessWidget {
         _RiskBar(
           label: 'Frost Stress',
           riskLevel: riskStats.getFrostStressLevel,
-          value: riskStats.getFrostStressValue.toDouble(),
+          value: riskStats.getFrostStressValue ?? 0.0,
           optimal: double.tryParse(riskStats.getFrostStressOptimal) ?? 0.0,
           worst: double.tryParse(riskStats.getFrostStressWorst) ?? 0.0,
         ),
@@ -90,7 +90,7 @@ class RisksSection extends StatelessWidget {
         _RiskBar(
           label: 'Drought Risk',
           riskLevel: riskStats.getDroughtRiskLevel,
-          value: riskStats.getDroughtRiskValue.toDouble(),
+          value: riskStats.getDroughtRiskValue ?? 0.0,
           optimal: double.tryParse(riskStats.getDroughtRiskOptimal) ?? 0.0,
           worst: double.tryParse(riskStats.getDroughtRiskWorst) ?? 0.0,
         ),
@@ -98,7 +98,7 @@ class RisksSection extends StatelessWidget {
         _RiskBar(
           label: 'Yield Risk',
           riskLevel: riskStats.getYieldRiskLevel,
-          value: riskStats.getYieldRiskValue.toDouble(),
+          value: riskStats.getYieldRiskValue ?? 0.0,
           optimal: double.tryParse(riskStats.getYieldRiskOptimal) ?? 0.0,
           worst: double.tryParse(riskStats.getYieldRiskWorst) ?? 0.0,
         ),

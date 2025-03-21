@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/controllers/farm_data_controller.dart';
-import 'package:frontend/models/current_weather.dart';
 import 'package:frontend/models/farm.dart';
 import 'package:frontend/models/weather.dart';
 import 'package:frontend/theme/app_theme.dart';
@@ -15,159 +14,115 @@ class FarmListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<FarmDataController>(
-      builder: (context, controller, _) => Stack(
-        children: [
-          // Weather background
-          if (controller.currentWeather != null) ...[
-            Positioned.fill(
-              child: Image.asset(
-                _getWeatherBackground(controller.currentWeather!),
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(color: Colors.blue[100]);
-                },
-              ),
-            ),
-          ],
-          // Content
-          Column(
+      builder: (context, controller, _) =>
+          Stack(
             children: [
-              // Weather info
-              _WeatherHeader(
-                weather: controller.currentWeather,
-                isLoading: controller.isLoadingWeather,
-                error: controller.weatherError,
-                onRetry: controller.refresh,
-              ),
-              // Farms list
-              Expanded(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                  ),
-                  child: controller.farms.isEmpty
-                      ? _EmptyState(onOpenMap: onOpenMap)
-                      : SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Text(
-                            'My Farms',
-                            style: Theme
-                                .of(context)
-                                .textTheme
-                                .headlineMedium,
-                          ),
-                        ),
-                        ...controller.farms.map(
-                              (farm) =>
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    16, 0, 16, 16),
-                                child: _FarmCard(farm: farm),
-                              ),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-                    ),
-                  ),
+              // Weather background
+              Positioned.fill(
+                child: Image.asset(
+                  controller.currentWeather.type.backgroundImage,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(color: Colors.blue[100]);
+                  },
                 ),
               ),
+              // Content
+              Column(
+                children: [
+                  // Weather info
+                  _WeatherHeader(weather: controller.currentWeather),
+                  // Farms list
+                  Expanded(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
+                        ),
+                      ),
+                      child: controller.farms.isEmpty
+                          ? _EmptyState(onOpenMap: onOpenMap)
+                          : SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Text(
+                                'My Farms',
+                                style: Theme
+                                    .of(context)
+                                    .textTheme
+                                    .headlineMedium,
+                              ),
+                            ),
+                            ...controller.farms.map(
+                                  (farm) =>
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        16, 0, 16, 16),
+                                    child: _FarmCard(farm: farm),
+                                  ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
-          ),
-        ],
       ),
     );
-  }
-
-  String _getWeatherBackground(CurrentWeather weather) {
-    if (weather.temperature > 30) {
-      return 'assets/images/weather/sunny.jpeg';
-    } else if (weather.humidity > 80) {
-      return 'assets/images/weather/rainy.jpeg';
-    } else if (weather.wind_speed > 20) {
-      return 'assets/images/weather/stormy.jpeg';
-    }
-    return 'assets/images/weather/cloudy.jpeg';
   }
 }
 
 class _WeatherHeader extends StatelessWidget {
-  final CurrentWeather? weather;
-  final bool isLoading;
-  final String? error;
-  final VoidCallback onRetry;
+  final WeatherInfo weather;
 
-  const _WeatherHeader({
-    required this.weather,
-    required this.isLoading,
-    this.error,
-    required this.onRetry,
-  });
+  const _WeatherHeader({required this.weather});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.35,
       padding: const EdgeInsets.all(24),
-      child: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, size: 48, color: Colors.white),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Failed to load weather data',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                      TextButton.icon(
-                        onPressed: onRetry,
-                        icon: const Icon(Icons.refresh, color: Colors.white),
-                        label: const Text('Retry', style: TextStyle(color: Colors.white)),
-                      ),
-                    ],
-                  ),
-                )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${weather?.temperature.toStringAsFixed(1)}°C',
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        color: Colors.white,
-                        height: 1,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        _WeatherStat(
-                          icon: Icons.water_drop,
-                          value: '${weather?.humidity.toStringAsFixed(0)}%',
-                          label: 'Humidity',
-                        ),
-                        const SizedBox(width: 24),
-                        _WeatherStat(
-                          icon: Icons.air,
-                          value: '${weather?.wind_speed.toStringAsFixed(1)} km/h',
-                          label: 'Wind',
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${weather.temperature.toStringAsFixed(1)}°C',
+            style: Theme
+                .of(context)
+                .textTheme
+                .displayLarge
+                ?.copyWith(
+              color: Colors.white,
+              height: 1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _WeatherStat(
+                icon: Icons.water_drop,
+                value: '${weather.humidity}%',
+                label: 'Humidity',
+              ),
+              const SizedBox(width: 24),
+              _WeatherStat(
+                icon: Icons.air,
+                value: '${weather.windSpeed} km/h',
+                label: 'Wind',
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

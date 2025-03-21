@@ -44,8 +44,8 @@ class RiskStats {
   // Helper methods to get specific values from risk arrays
   String getRiskLevel(List<dynamic> riskArray) => riskArray.isNotEmpty ? riskArray[0].toString() : 'unknown';
 
-  num getActualValue(List<dynamic> riskArray) =>
-      riskArray.length > 1 ? (riskArray[1] is num ? riskArray[1] as num : 0.0) : 0.0;
+  double getActualValue(List<dynamic> riskArray) =>
+      riskArray.length > 1 ? (riskArray[1] is double ? riskArray[1] as double : 0.0) : 0.0;
 
 
   String getOptimalValue(List<dynamic> riskArray) => riskArray.length > 2 ? riskArray[2].toString() : '';
@@ -59,11 +59,11 @@ class RiskStats {
   String get getYieldRiskLevel => getRiskLevel(yieldRisk);
 
   // Actual value getters
-  num get getDayRiskValue => getActualValue(dayRisk);
-  num get getNightRiskValue => getActualValue(nightRisk);
-  num get getFrostStressValue => getActualValue(frostStress);
-  num get getDroughtRiskValue => getActualValue(droughtRisk);
-  num get getYieldRiskValue => getActualValue(yieldRisk);
+  double get getDayRiskValue => getActualValue(dayRisk);
+  double get getFrostStressValue => getActualValue(frostStress);
+  double get getNightRiskValue => getActualValue(nightRisk);
+  double get getDroughtRiskValue => getActualValue(droughtRisk);
+  double get getYieldRiskValue => getActualValue(yieldRisk);
 
   // Optimal value getters
   String get getDayRiskOptimal => getOptimalValue(dayRisk);
@@ -98,12 +98,4 @@ class RiskStats {
       recommendedProducts: $recommendedProducts
     }''';
   }
-}
-
-Future<void> main() async {
-  final result = await BackendController.getRiskStats(42.5, -5.2, 'cotton');
-  print(result);
-  print(result);
-  print(result);
-  print(result);
 }
