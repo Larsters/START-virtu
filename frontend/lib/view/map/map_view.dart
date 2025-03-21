@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frontend/map/map_controller.dart';
+import 'package:frontend/view/map/map_controller.dart';
 import 'package:maplibre/maplibre.dart';
 
 @immutable

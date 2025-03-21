@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/view/map/map_view.dart';
 import 'package:frontend/view/farm_list/farm_list_view.dart';
+import 'package:frontend/view/map/map_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
