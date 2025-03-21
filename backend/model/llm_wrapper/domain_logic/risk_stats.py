@@ -19,48 +19,48 @@ WORST_YIELD_RISK = ">1000"
 
 
 def get_stats(latitude, longitude, crop_type):
-    daytime_heat_stress_risk = str(round(
+    daytime_heat_stress_risk = round(
         get_daytime_heat_stress_risk(latitude, longitude, crop_type), 2
-    ))
+    )
 
-    nighttime_heat_stress_risk = str(round(
+    nighttime_heat_stress_risk = round(
         get_nighttime_heat_stress_risk(latitude, longitude, crop_type), 2
-    ))
+    )
 
-    frost_stress = str(round(get_frost_stress(latitude, longitude, crop_type), 2))
+    frost_stress = round(get_frost_stress(latitude, longitude, crop_type), 2)
 
-    drought_risk = str(round(get_drought_risk(latitude, longitude), 2))
+    drought_risk = round(get_drought_risk(latitude, longitude), 2)
 
-    yield_risk = str(round(get_yield_risk(latitude, longitude, crop_type), 2))
+    yield_risk = round(get_yield_risk(latitude, longitude, crop_type), 2)
 
     stats = {
         "daytime_heat_stress_risk": [
             get_daytime_heat_stress_risk_level(daytime_heat_stress_risk),
-            daytime_heat_stress_risk,
+            str(daytime_heat_stress_risk),
             OPTIMAL_DAYTIME_HEAT_STRESS_RISK,
             WORST_DAYTIME_HEAT_STRESS_RISK,
         ],
         "nighttime_heat_stress_risk": [
             get_nighttime_heat_stress_risk_level(nighttime_heat_stress_risk),
-            nighttime_heat_stress_risk,
+            str(nighttime_heat_stress_risk),
             OPTIMAL_NIGHTTIME_HEAT_STRESS_RISK,
             WORST_NIGHTTIME_HEAT_STRESS_RISK,
         ],
         "frost_stress": [
             get_frost_stress_risk_level(frost_stress),
-            frost_stress,
+            str(frost_stress),
             OPTIMAL_FROST_STRESS,
             WORST_FROST_STRESS,
         ],
         "drought_risk": [
             get_drought_risk_level(drought_risk),
-            drought_risk,
+            str(drought_risk),
             OPTIMAL_DROUGHT_RISK,
             WORST_DROUGHT_RISK,
         ],
         "yield_risk": [
             get_yield_risk_level(yield_risk),
-            yield_risk,
+            str(yield_risk),
             OPTIMAL_YIELD_RISK,
             WORST_YIELD_RISK,
         ],
