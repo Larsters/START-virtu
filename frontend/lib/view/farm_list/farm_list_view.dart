@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/theme/app_theme.dart';
-import 'package:frontend/view/crop/crop_view.dart';
+import 'package:frontend/view/farm_details/farm_details_view.dart';
 import 'package:frontend/view/farm_list/farm_list_controller.dart';
 import 'package:provider/provider.dart';
 
@@ -181,7 +181,14 @@ class _FarmCard extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute<void>(
-              builder: (context) => CropView(crop: farm.crop),
+              builder:
+                  (context) => FarmDetailsView(
+                    farmName: farm.name,
+                    cropType: farm.crop,
+                    latitude: farm.latitude,
+                    longitude: farm.longitude,
+                    healthScore: farm.health.overallScore,
+                  ),
             ),
           );
         },

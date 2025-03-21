@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/view/farm_list/crops.dart';
+import 'package:frontend/view/farm_list/crop_type.dart';
 
 class CropHeader extends StatelessWidget {
-  final Crops crop;
+  final CropType crop;
 
   const CropHeader({super.key, required this.crop});
 

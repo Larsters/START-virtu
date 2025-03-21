@@ -1,11 +1,12 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'dart:io';
 
-class BackendController {
+import 'package:http/http.dart' as http;
+
+class ApiManager {
   static final String baseUrl = 'https://localhost:8000';
 
-  BackendController();
+  ApiManager();
 
   Future<Map<String, dynamic>> get(String endpoint, {Map<String, dynamic>? params}) async {
     try {
@@ -91,7 +92,7 @@ class BackendController {
 
 
   static Future<Map<String, dynamic>?> getSoilData(double latitude, double longitude) async {
-    BackendController backend = BackendController();
+    ApiManager backend = ApiManager();
     final result = await backend.get('getSoilData', params:{
       'latitude': latitude,
       'longitude': longitude
@@ -100,7 +101,7 @@ class BackendController {
   }
 
   static Future<Map<String, dynamic>?> getWeatherData(double latitude, double longitude) async {
-    BackendController backend = BackendController();
+    ApiManager backend = ApiManager();
     final result = await backend.get('getCurrentWeather', params:{
       'latitude': latitude,
       'longitude': longitude

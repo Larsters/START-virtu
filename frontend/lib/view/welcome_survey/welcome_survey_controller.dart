@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/services/app_data_manager.dart';
 import 'package:frontend/services/preferences_manager.dart';
-import 'package:frontend/view/farm_list/crops.dart';
+import 'package:frontend/view/farm_list/crop_type.dart';
 import 'package:frontend/view/farm_list/farm_location.dart';
 
 class WelcomeSurveyController extends ChangeNotifier {
   // Selected crops and their locations
-  final Map<Crops, List<FarmLocation>> _cropLocations = {};
+  final Map<CropType, List<FarmLocation>> _cropLocations = {};
 
   // Currently expanded crop
-  Crops? _expandedCrop;
+  CropType? _expandedCrop;
 
   // Form controllers for new location
   final TextEditingController nameController = TextEditingController();
@@ -38,26 +38,26 @@ class WelcomeSurveyController extends ChangeNotifier {
   }
 
   // Getters
-  Map<Crops, List<FarmLocation>> get cropLocations => _cropLocations;
+  Map<CropType, List<FarmLocation>> get cropLocations => _cropLocations;
 
-  Crops? get expandedCrop => _expandedCrop;
+  CropType? get expandedCrop => _expandedCrop;
 
-  List<FarmLocation> getLocationsForCrop(Crops crop) =>
+  List<FarmLocation> getLocationsForCrop(CropType crop) =>
       _cropLocations[crop] ?? [];
 
-  bool isCropSelected(Crops crop) =>
+  bool isCropSelected(CropType crop) =>
       _cropLocations.containsKey(crop) && _cropLocations[crop]!.isNotEmpty;
 
   void _onFormChanged() {
     notifyListeners();
   }
 
-  void toggleCropExpansion(Crops crop) {
+  void toggleCropExpansion(CropType crop) {
     _expandedCrop = _expandedCrop == crop ? null : crop;
     notifyListeners();
   }
 
-  void addLocation(Crops crop) {
+  void addLocation(CropType crop) {
     if (!isValidForm()) return;
 
     final location = FarmLocation(
@@ -80,7 +80,7 @@ class WelcomeSurveyController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void removeLocation(Crops crop, int index) {
+  void removeLocation(CropType crop, int index) {
     if (_cropLocations.containsKey(crop)) {
       _cropLocations[crop]!.removeAt(index);
       if (_cropLocations[crop]!.isEmpty) {
