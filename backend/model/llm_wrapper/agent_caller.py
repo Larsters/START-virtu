@@ -3,6 +3,7 @@ import json
 import os
 import argparse
 from pathlib import Path
+from backend.model.llm_wrapper.domain_logic.recommendations import recommend_products
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 import numpy as np
@@ -23,6 +24,11 @@ class LLMAgent:
             self.functions = self._load_functions()
         except Exception as e:
             raise Exception(f"Failed to initialize LLM: {str(e)}")
+        
+
+    def recommend_products(self, crop_type, weather_prediction, soil_data=None, latitude=None, longitude=None):
+        """Call the recommendation function with the provided parameters"""
+        return recommend_products(crop_type, weather_prediction, soil_data, latitude, longitude)
     
     def _load_functions(self):
         current_dir = Path(__file__).parent

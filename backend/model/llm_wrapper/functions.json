@@ -111,6 +111,37 @@
           },
           "required": ["latitude", "longitude", "days_ahead"]
         }
+      },
+      {
+        "name": "recommend_products",
+        "description": "Recommend products based on crop conditions, soil data, and weather predictions",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "crop_type": {
+              "type": "string",
+              "enum": ["Soybean", "Corn", "Cotton"],
+              "description": "Type of crop being evaluated"
+            },
+            "weather_prediction": {
+              "type": "object",
+              "description": "Weather forecast data from predict_future_weather function"
+            },
+            "soil_data": {
+              "type": "object",
+              "description": "Optional soil data. If not provided, will be fetched using coordinates."
+            },
+            "latitude": {
+              "type": "number",
+              "description": "Optional latitude coordinate for fetching soil data"
+            },
+            "longitude": {
+              "type": "number",
+              "description": "Optional longitude coordinate for fetching soil data"
+            }
+          },
+          "required": ["crop_type", "weather_prediction"]
+        }
       }
       
   ]
