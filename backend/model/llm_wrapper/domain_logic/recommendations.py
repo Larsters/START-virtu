@@ -57,9 +57,9 @@ def recommend_products(crop_type, weather_prediction, soil_data=None, latitude=N
             continue
             
         probability = len(matching_problems) / len(identified_problems) if identified_problems else 0.5
-        accuracy = _calculate_accuracy(matching_problems, weather_prediction, soil_data)
+        accuracy = calculate_accuracy(matching_problems, weather_prediction, soil_data)
 
-        text =_generate_recommendation_text(product_name, crop_type, matching_problems, info["description"], weather_prediction)
+        text =generate_recommendation_text(product_name, crop_type, matching_problems, info["description"], weather_prediction)
 
         recommendations.append({
             "recommended_product": product_name,
@@ -91,7 +91,7 @@ def calculate_accuracy():
     """Calculate accuracy score (1-10) for the recommendation"""
     pass
 
-def _generate_recommendation_text():
+def generate_recommendation_text():
     """Generate recommendation text based on product, crop, problems, weather, soil, calculations"""
     pass
 
