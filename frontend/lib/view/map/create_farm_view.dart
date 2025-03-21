@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/map/map_controller.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/theme/constants.dart';
-import 'package:frontend/view/welcome_survey/models/crops.dart';
+import 'package:frontend/view/farm_list/crops.dart';
 import 'package:maplibre/maplibre.dart';
 
 class Farm {

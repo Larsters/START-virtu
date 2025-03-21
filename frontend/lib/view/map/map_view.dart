@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/map/map_controller.dart';
 import 'package:frontend/view/map/create_farm_view.dart';
-import 'package:frontend/view/welcome_survey/models/crops.dart';
+import 'package:frontend/view/farm_list/crops.dart';
+import 'package:frontend/view/farm_list/farm_location.dart';
 import 'package:maplibre/maplibre.dart';
-import 'package:frontend/view/map/create_farm_view.dart';
+import 'package:frontend/services/app_data_manager.dart';
 
 @immutable
 class MapView extends StatefulWidget {
@@ -19,10 +20,12 @@ class MapView extends StatefulWidget {
 
 class FarmPoint extends Point {
   final Crops cropType;
+  final String name;
 
   FarmPoint({
     required Position coordinates,
     required this.cropType,
+    required this.name,
   }) : super(coordinates: coordinates);
 
   String get iconKey {
@@ -42,6 +45,7 @@ class _MyMapWidget extends State<MapView> {
   MapController? _mapController;
 
   final LocationController _controller = LocationController();
+  final AppDataManager _appDataManager = AppDataManager();
   Position? _currentPosition;
   final List<FarmPoint> _markersPoints = [];
 
@@ -49,6 +53,7 @@ class _MyMapWidget extends State<MapView> {
   void initState() {
     super.initState();
     _loadCurrentPosition();
+    _loadSavedFarms();
   }
 
   Future<void> _addCustomImage(StyleController styleController) async {
@@ -84,13 +89,53 @@ class _MyMapWidget extends State<MapView> {
     }
   }
 
-  void _addMarker(Position position, Crops cropType) {
+  Future<void> _loadSavedFarms() async {
+    try {
+      final farmLocations = await _appDataManager.loadFarmLocations();
+      setState(() {
+        for (var entry in farmLocations.entries) {
+          for (var location in entry.value) {
+            _markersPoints.add(FarmPoint(
+              coordinates: Position(location.longitude, location.latitude),
+              cropType: entry.key, name: location.name,
+            ));
+          }
+        }
+      });
+    } catch (e) {
+      print('Error loading saved farms: $e');
+    }
+  }
+
+  void _addMarker(Position position, Crops cropType, String name) {
     setState(() {
       _markersPoints.add(FarmPoint(
         coordinates: position,
-        cropType: cropType,
+        cropType: cropType, name: name,
       ));
     });
+    
+    // Save the updated farms
+    _saveFarms();
+  }
+
+  Future<void> _saveFarms() async {
+    try {
+      // Convert FarmPoints to a Map<Crops, List<FarmLocation>>
+      final Map<Crops, List<FarmLocation>> farmLocations = {};
+      
+      for (var point in _markersPoints) {
+        farmLocations.putIfAbsent(point.cropType, () => []);
+        farmLocations[point.cropType]!.add(FarmLocation(
+          latitude: point.coordinates.lat as double,
+          longitude: point.coordinates.lng as double, name: point.name, crop: point.cropType,
+        ));
+      }
+      
+      await _appDataManager.saveFarmLocations(farmLocations);
+    } catch (e) {
+      print('Error saving farms: $e');
+    }
   }
 
   @override
@@ -145,7 +190,7 @@ class _MyMapWidget extends State<MapView> {
               ),
             ).then((Farm? farm) {
               if (farm != null) {
-                _addMarker(position, farm.cropType);
+                _addMarker(position, farm.cropType, farm.name);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Farm "${farm.name}" (${farm.cropType.localized()}) created successfully!'),

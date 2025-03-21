@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/services/app_data_manager.dart';
 import 'package:frontend/services/preferences_manager.dart';
-import 'package:frontend/view/welcome_survey/models/crops.dart';
-import 'package:frontend/view/welcome_survey/models/farm_location.dart';
+import 'package:frontend/view/farm_list/crops.dart';
+import 'package:frontend/view/farm_list/farm_location.dart';
 
 class WelcomeSurveyController extends ChangeNotifier {
   // Selected crops and their locations
