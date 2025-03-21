@@ -1,16 +1,18 @@
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:frontend/models/current_weather.dart';
 import 'package:frontend/models/risk_stats.dart';
 import 'package:frontend/models/soil_data.dart';
 import 'package:http/http.dart' as http;
-import 'dart:io';
 
 class BackendController {
   static final String baseUrl = 'http://localhost:8000';
 
   BackendController();
 
-  Future<Map<String, dynamic>> get(String endpoint, {Map<String, dynamic>? params}) async {
+  Future<Map<String, dynamic>> _get(String endpoint,
+      {Map<String, dynamic>? params}) async {
     try {
       var uri = Uri.parse('$baseUrl/$endpoint');
       
@@ -51,51 +53,9 @@ class BackendController {
     }
   }
 
-  Future<dynamic> getAny(String endpoint) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/$endpoint'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        throw HttpException(
-          'Failed to load data: ${response.statusCode}',
-          uri: Uri.parse('$baseUrl/$endpoint'),
-        );
-      }
-    } catch (e) {
-      throw Exception('Network error: $e');
-    }
-  }
-
-  // You might want to add methods for specific endpoints
-  Future<Map<String, dynamic>> getFarms({
-    String? searchTerm,
-    int? limit,
-    int? page,
-  }) async {
-    final params = <String, dynamic>{
-      if (searchTerm != null) 'search': searchTerm,
-      if (limit != null) 'limit': limit,
-      if (page != null) 'page': page,
-    };
-    return get('farms', params: params);
-  }
-
-  Future<Map<String, dynamic>> getFarmById(String id) async {
-    return get('farms/$id');
-  }
-
-
-
   static Future<SoilData> getSoilData(double latitude, double longitude) async {
     BackendController backend = BackendController();
-    final result = await backend.get('getSoilData', params:{
+    final result = await backend._get('getSoilData', params: {
       'latitude': latitude,
       'longitude': longitude
     });
@@ -104,7 +64,7 @@ class BackendController {
 
   static Future<CurrentWeather> getWeatherData(double latitude, double longitude) async {
     BackendController backend = BackendController();
-    final result = await backend.get('getCurrentWeather', params:{
+    final result = await backend._get('getCurrentWeather', params: {
       'latitude': latitude,
       'longitude': longitude
     });
@@ -114,7 +74,7 @@ class BackendController {
   static Future<RiskStats> getRiskStats(double latitude, double longitude, String crop) async {
     BackendController backend = BackendController();
 
-    final result = await backend.get('getRiskStats', params:{
+    final result = await backend._get('getRiskStats', params: {
       'latitude': latitude,
       'longitude': longitude,
       'crop': crop

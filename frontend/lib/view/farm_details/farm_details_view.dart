@@ -6,6 +6,7 @@ import 'package:frontend/view/farm_details/models/product.dart';
 import 'package:frontend/view/farm_details/widgets/alerts_section.dart';
 import 'package:frontend/view/farm_details/widgets/farm_header.dart';
 import 'package:frontend/view/farm_details/widgets/risks_section.dart';
+import 'package:frontend/view/farm_details/widgets/soil_section.dart';
 import 'package:frontend/view/farm_details/widgets/used_products_section.dart';
 import 'package:frontend/view/farm_list/crop_type.dart';
 import 'package:provider/provider.dart';
@@ -70,8 +71,8 @@ class FarmDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create:
-          (_) => FarmDetailsController(
+      create: (_) =>
+          FarmDetailsController(
             farmName: farmName,
             cropType: cropType,
             latitude: latitude,
@@ -94,42 +95,42 @@ class FarmDetailsView extends StatelessWidget {
             ),
             if (cropType != null)
               Consumer<FarmDetailsController>(
-                builder:
-                    (context, controller, _) => PopupMenuButton<Product>(
+                builder: (context, controller, _) =>
+                    PopupMenuButton<Product>(
                       icon: const Icon(Icons.add),
-                      itemBuilder:
-                          (context) => [
-                            const PopupMenuItem(
-                              value: Product.stressBooster,
-                              child: Row(
-                                children: [
-                                  Icon(Icons.healing),
-                                  SizedBox(width: 8),
-                                  Text('Add Stress Booster'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: Product.nutrientBooster,
-                              child: Row(
-                                children: [
-                                  Icon(Icons.local_florist),
-                                  SizedBox(width: 8),
-                                  Text('Add Nutrient Booster'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: Product.yieldBooster,
-                              child: Row(
-                                children: [
-                                  Icon(Icons.trending_up),
-                                  SizedBox(width: 8),
-                                  Text('Add Yield Booster'),
-                                ],
-                              ),
-                            ),
-                          ],
+                      itemBuilder: (context) =>
+                      [
+                        const PopupMenuItem(
+                          value: Product.stressBooster,
+                          child: Row(
+                            children: [
+                              Icon(Icons.healing),
+                              SizedBox(width: 8),
+                              Text('Add Stress Booster'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: Product.nutrientBooster,
+                          child: Row(
+                            children: [
+                              Icon(Icons.local_florist),
+                              SizedBox(width: 8),
+                              Text('Add Nutrient Booster'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: Product.yieldBooster,
+                          child: Row(
+                            children: [
+                              Icon(Icons.trending_up),
+                              SizedBox(width: 8),
+                              Text('Add Yield Booster'),
+                            ],
+                          ),
+                        ),
+                      ],
                       onSelected: (product) async {
                         final selectedDate = await showDatePicker(
                           context: context,
@@ -151,19 +152,19 @@ class FarmDetailsView extends StatelessWidget {
               ),
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert),
-              itemBuilder:
-                  (context) => [
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Delete Farm'),
-                        ],
-                      ),
-                    ),
-                  ],
+              itemBuilder: (context) =>
+              [
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text('Delete Farm'),
+                    ],
+                  ),
+                ),
+              ],
               onSelected: (value) {
                 if (value == 'delete') {
                   _showDeleteConfirmation(context);
@@ -174,75 +175,137 @@ class FarmDetailsView extends StatelessWidget {
         ),
         body: SafeArea(
           child: Consumer<FarmDetailsController>(
-            builder:
-                (context, controller, _) => SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (controller.cropType != null) ...[
-                          FarmHeader(
-                            farmName: farmName,
-                            cropType: controller.cropType!,
-                            healthScore: healthScore,
-                          ),
-                          const SizedBox(height: 24),
-                          const AlertsSection(),
-                          const SizedBox(height: 24),
-                          const UsedProductsSection(),
-                          const SizedBox(height: 24),
+            builder: (context, controller, _) =>
+                RefreshIndicator(
+                  onRefresh: () => controller.refreshData(),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (controller.cropType != null) ...[
+                            FarmHeader(
+                              farmName: farmName,
+                              cropType: controller.cropType!,
+                              healthScore: healthScore,
+                            ),
+                            const SizedBox(height: 24),
+                            const AlertsSection(),
+                            const SizedBox(height: 24),
+                            const UsedProductsSection(),
+                            const SizedBox(height: 24),
+                            if (controller.isLoading)
+                              const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(32),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              )
+                            else
+                              if (controller.error != null)
+                                Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(32),
+                                    child: Column(
+                                      children: [
+                                        const Icon(
+                                          Icons.error_outline,
+                                          size: 48,
+                                          color: Colors.red,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'Failed to load farm data',
+                                          style: Theme
+                                              .of(context)
+                                              .textTheme
+                                              .titleMedium,
+                                        ),
+                                        Text(
+                                          controller.error!,
+                                          style: Theme
+                                              .of(context)
+                                              .textTheme
+                                              .bodyMedium,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        FilledButton.icon(
+                                          onPressed: () =>
+                                              controller.refreshData(),
+                                          icon: const Icon(Icons.refresh),
+                                          label: const Text('Retry'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              else
+                                ...[
+                                  if (controller.soilData != null) ...[
+                                    SoilSection(soilData: controller.soilData!),
+                                    const SizedBox(height: 24),
+                                  ],
                           const RisksSection(),
-                        ] else if (controller.lastHarvestData != null) ...[
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Colors.green.withOpacity(0.1),
-                                  Colors.blue.withOpacity(0.1),
                                 ],
+                          ] else
+                            if (controller.lastHarvestData != null) ...[
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(24),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Colors.green.withOpacity(0.1),
+                                      Colors.blue.withOpacity(0.1),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  children: [
+                                    const Icon(
+                                      Icons.check_circle_outline,
+                                      size: 48,
+                                      color: Colors.green,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'Season Complete',
+                                      style: Theme
+                                          .of(context)
+                                          .textTheme
+                                          .headlineMedium,
+                                    ),
+                                    Text(
+                                      farmName,
+                                      style: Theme
+                                          .of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(color: Colors.grey[600]),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Column(
-                              children: [
-                                const Icon(
-                                  Icons.check_circle_outline,
-                                  size: 48,
-                                  color: Colors.green,
+                              const SizedBox(height: 24),
+                              _LastHarvestInfo(
+                                  data: controller.lastHarvestData!),
+                              const SizedBox(height: 32),
+                              Center(
+                                child: FilledButton.icon(
+                                  onPressed: () => _showCropSelector(context),
+                                  icon: const Icon(Icons.add),
+                                  label: const Text('Plant New Crop'),
                                 ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Season Complete',
-                                  style:
-                                      Theme.of(
-                                        context,
-                                      ).textTheme.headlineMedium,
-                                ),
-                                Text(
-                                  farmName,
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(color: Colors.grey[600]),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          _LastHarvestInfo(data: controller.lastHarvestData!),
-                          const SizedBox(height: 32),
-                          Center(
-                            child: FilledButton.icon(
-                              onPressed: () => _showCropSelector(context),
-                              icon: const Icon(Icons.add),
-                              label: const Text('Plant New Crop'),
-                            ),
-                          ),
+                              ),
+                            ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
