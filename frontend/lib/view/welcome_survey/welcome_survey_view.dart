@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/view/map/map_view.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/theme/constants.dart';
-import 'package:frontend/view/farm_list/crops.dart';
+import 'package:frontend/view/farm_list/crop_type.dart';
 import 'package:frontend/view/farm_list/farm_location.dart';
+import 'package:frontend/view/map/map_view.dart';
 import 'package:frontend/view/welcome_survey/welcome_survey_controller.dart';
 import 'package:provider/provider.dart';
 
@@ -47,7 +47,7 @@ class WelcomeSurveyView extends StatelessWidget {
                 SizedBox(height: Spacings.xl),
                 Column(
                   children: [
-                    ...Crops.values.map(
+                    ...CropType.values.map(
                       (crop) => Padding(
                         padding: EdgeInsets.only(bottom: Spacings.m),
                         child: CropSelectionButton(crop: crop),
@@ -87,7 +87,7 @@ class WelcomeSurveyView extends StatelessWidget {
 }
 
 class CropSelectionButton extends StatelessWidget {
-  final Crops crop;
+  final CropType crop;
 
   const CropSelectionButton({super.key, required this.crop});
 
@@ -190,7 +190,7 @@ class CropSelectionButton extends StatelessWidget {
 }
 
 class _LocationsList extends StatelessWidget {
-  final Crops crop;
+  final CropType crop;
   final List<FarmLocation> locations;
 
   const _LocationsList({required this.crop, required this.locations});
@@ -248,7 +248,7 @@ class _LocationsList extends StatelessWidget {
 }
 
 class _AddLocationForm extends StatelessWidget {
-  final Crops crop;
+  final CropType crop;
 
   const _AddLocationForm({required this.crop});
 

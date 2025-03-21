@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:frontend/view/farm_list/crops.dart';
+import 'package:frontend/view/farm_list/crop_type.dart';
 import 'package:frontend/view/farm_list/farm_location.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -37,7 +37,7 @@ class AppDataManager {
   }
 
   Future<void> saveFarmLocations(
-    Map<Crops, List<FarmLocation>> cropLocations,
+    Map<CropType, List<FarmLocation>> cropLocations,
   ) async {
     try {
       final file = await _localFile;
@@ -59,7 +59,7 @@ class AppDataManager {
     }
   }
 
-  Future<Map<Crops, List<FarmLocation>>> loadFarmLocations() async {
+  Future<Map<CropType, List<FarmLocation>>> loadFarmLocations() async {
     try {
       final file = await _localFile;
       final String contents = await file.readAsString();
@@ -75,12 +75,12 @@ class AppDataManager {
         return {};
       }
 
-      final Map<Crops, List<FarmLocation>> cropLocations = {};
+      final Map<CropType, List<FarmLocation>> cropLocations = {};
 
       final locationsData = data['cropLocations'] as Map<String, dynamic>;
 
       for (final entry in locationsData.entries) {
-        final crop = Crops.values.firstWhere((c) => c.name == entry.key);
+        final crop = CropType.values.firstWhere((c) => c.name == entry.key);
         final locationsList = entry.value as List;
 
         cropLocations[crop] =

@@ -1,14 +1,11 @@
-import 'dart:typed_data';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frontend/map/map_controller.dart';
-import 'package:frontend/view/map/create_farm_view.dart';
-import 'package:frontend/view/farm_list/crops.dart';
-import 'package:frontend/view/farm_list/farm_location.dart';
-import 'package:maplibre/maplibre.dart';
 import 'package:frontend/services/app_data_manager.dart';
+import 'package:frontend/view/farm_list/crop_type.dart';
+import 'package:frontend/view/farm_list/farm_location.dart';
+import 'package:frontend/view/map/create_farm_view.dart';
+import 'package:frontend/view/map/map_controller.dart';
+import 'package:maplibre/maplibre.dart';
 
 @immutable
 class MapView extends StatefulWidget {
@@ -19,7 +16,7 @@ class MapView extends StatefulWidget {
 }
 
 class FarmPoint extends Point {
-  final Crops cropType;
+  final CropType cropType;
   final String name;
 
   FarmPoint({
@@ -30,11 +27,11 @@ class FarmPoint extends Point {
 
   String get iconKey {
     switch (cropType) {
-      case Crops.soybean:
+      case CropType.soybean:
         return 'farm-soybean';
-      case Crops.corn:
+      case CropType.corn:
         return 'farm-corn';
-      case Crops.cotton:
+      case CropType.cotton:
         return 'farm-cotton';
     }
   }
@@ -107,7 +104,7 @@ class _MyMapWidget extends State<MapView> {
     }
   }
 
-  void _addMarker(Position position, Crops cropType, String name) {
+  void _addMarker(Position position, CropType cropType, String name) {
     setState(() {
       _markersPoints.add(FarmPoint(
         coordinates: position,
@@ -122,7 +119,7 @@ class _MyMapWidget extends State<MapView> {
   Future<void> _saveFarms() async {
     try {
       // Convert FarmPoints to a Map<Crops, List<FarmLocation>>
-      final Map<Crops, List<FarmLocation>> farmLocations = {};
+      final Map<CropType, List<FarmLocation>> farmLocations = {};
       
       for (var point in _markersPoints) {
         farmLocations.putIfAbsent(point.cropType, () => []);
@@ -165,17 +162,23 @@ class _MyMapWidget extends State<MapView> {
         },
         layers: [
           MarkerLayer(
-            points: _markersPoints.where((p) => p.cropType == Crops.corn).toList(),
+            points: _markersPoints
+                .where((p) => p.cropType == CropType.corn)
+                .toList(),
             iconSize: 0.5,
             iconImage: 'farm-corn',
           ),
           MarkerLayer(
-            points: _markersPoints.where((p) => p.cropType == Crops.soybean).toList(),
+            points: _markersPoints
+                .where((p) => p.cropType == CropType.soybean)
+                .toList(),
             iconSize: 0.1,
             iconImage: 'farm-soybean',
           ),
           MarkerLayer(
-            points: _markersPoints.where((p) => p.cropType == Crops.cotton).toList(),
+            points: _markersPoints
+                .where((p) => p.cropType == CropType.cotton)
+                .toList(),
             iconSize: 0.3,
             iconImage: 'farm-cotton',
           ),

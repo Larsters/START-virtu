@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/view/farm_list/crops.dart';
+import 'package:frontend/view/farm_list/crop_type.dart';
 
 enum WeatherType {
   sunny,
@@ -49,7 +49,7 @@ class FarmHealth {
 
 class Farm {
   final String name;
-  final Crops crop;
+  final CropType crop;
   final FarmHealth health;
   final double latitude;
   final double longitude;
@@ -76,14 +76,14 @@ class FarmListController extends ChangeNotifier {
   List<Farm> get farms => [
     Farm(
       name: 'Green Valley Farm',
-      crop: Crops.corn,
+      crop: CropType.corn,
       health: FarmHealth(overallScore: 85, hasRisk: false),
       latitude: 42.3601,
       longitude: -71.0589,
     ),
     Farm(
       name: 'Sunset Fields',
-      crop: Crops.soybean,
+      crop: CropType.soybean,
       health: FarmHealth(
         overallScore: 65,
         alert: 'High pest risk detected',
@@ -94,7 +94,7 @@ class FarmListController extends ChangeNotifier {
     ),
     Farm(
       name: 'Cotton Hills',
-      crop: Crops.cotton,
+      crop: CropType.cotton,
       health: FarmHealth(overallScore: 92, hasRisk: false),
       latitude: 34.0522,
       longitude: -118.2437,

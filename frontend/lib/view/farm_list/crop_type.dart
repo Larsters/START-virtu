@@ -1,4 +1,4 @@
-enum Crops {
+enum CropType {
   soybean(
     displayName: 'Soybean',
     imagePath: 'assets/images/soybean.jpg',
@@ -19,7 +19,7 @@ enum Crops {
   final String imagePath;
   final int color;
 
-  const Crops({
+  const CropType({
     required this.displayName,
     required this.imagePath,
     required this.color,

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/map/map_controller.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/theme/constants.dart';
-import 'package:frontend/view/farm_list/crops.dart';
+import 'package:frontend/view/farm_list/crop_type.dart';
 import 'package:maplibre/maplibre.dart';
 
 class Farm {
   final String name;
-  final Crops cropType;
+  final CropType cropType;
   final Position position;
 
   Farm({
@@ -32,7 +31,7 @@ class CreateFarmView extends StatefulWidget {
 class _CreateFarmViewState extends State<CreateFarmView> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  Crops? _selectedCrop;
+  CropType? _selectedCrop;
 
   @override
   void dispose() {
@@ -90,7 +89,7 @@ class _CreateFarmViewState extends State<CreateFarmView> {
               Expanded(
                 child: ListView(
                   children: [
-                    ...Crops.values.map(
+                    ...CropType.values.map(
                       (crop) => Padding(
                         padding: EdgeInsets.only(bottom: Spacings.m),
                         child: GestureDetector(
