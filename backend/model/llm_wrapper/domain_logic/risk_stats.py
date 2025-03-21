@@ -1,4 +1,4 @@
-from calculations import (
+from model.llm_wrapper.domain_logic.calculations import (
     get_daytime_heat_stress_risk,
     get_nighttime_heat_stress_risk,
     get_frost_stress,
