@@ -43,7 +43,11 @@ class RiskStats {
 
   // Helper methods to get specific values from risk arrays
   String getRiskLevel(List<dynamic> riskArray) => riskArray.isNotEmpty ? riskArray[0].toString() : 'unknown';
-  num getActualValue(List<dynamic> riskArray) => riskArray.length > 1 ? double.tryParse(riskArray[1].toString()) ?? 0.0 : 0.0;
+
+  num getActualValue(List<dynamic> riskArray) =>
+      riskArray.length > 1 ? (riskArray[1] is num ? riskArray[1] as num : 0.0) : 0.0;
+
+
   String getOptimalValue(List<dynamic> riskArray) => riskArray.length > 2 ? riskArray[2].toString() : '';
   String getWorstValue(List<dynamic> riskArray) => riskArray.length > 3 ? riskArray[3].toString() : '';
 

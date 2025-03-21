@@ -7,7 +7,7 @@ import 'package:frontend/models/soil_data.dart';
 import 'package:http/http.dart' as http;
 
 class BackendController {
-  static final String baseUrl = 'http://10.0.0.2:8000';
+  static final String baseUrl = 'http://localhost:8000';
 
   BackendController();
 
