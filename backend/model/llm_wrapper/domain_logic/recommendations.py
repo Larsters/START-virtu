@@ -1,9 +1,11 @@
+from datetime import datetime, timedelta
+from backend.model.llm_wrapper.domain_logic.calculations import calculate_daytime_heat_stress_risk, calculate_frost_stress, calculate_nighttime_heat_stress_risk, get_drought_risk
 from backend.model.llm_wrapper.services.soil_service import fetch_soil_data
 
 def recommend_products(crop_type, weather_prediction, soil_data=None, latitude=None, longitude=None):
     """
     Recommends products based on crop type, soil data, and weather predictions.
-    
+
     Args:
         crop_type (str): Type of crop (Soybean, Corn, Cotton)
         weather_prediction (dict): Weather forecast data from predict_future_weather
@@ -45,6 +47,23 @@ def recommend_products(crop_type, weather_prediction, soil_data=None, latitude=N
                 "soil_pH": 6.5,
                 "soil_nutrients": 0.05
             }
+
+    calculation_results = {}
+    if latitude is not None and longitude is not None:
+        try:
+            # Calculate stress factors using the scientific formulas
+            calculation_results["daytime_heat_stress"] = calculate_daytime_heat_stress_risk(latitude, longitude, crop_type.lower())
+            calculation_results["nighttime_heat_stress"] = calculate_nighttime_heat_stress_risk(latitude, longitude, crop_type.lower())
+            calculation_results["frost_stress"] = calculate_frost_stress(latitude, longitude, crop_type.lower())
+            calculation_results["drought_risk"] = get_drought_risk(latitude, longitude)
+            
+            # Get date range for yield calculations
+            start = datetime.now() - timedelta(days=90)
+            end = datetime.now() + timedelta(days=14)  # Include forecast period
+            calculation_results["yield_risk"] = get_yield_risk(latitude, longitude, start, end, crop_type.lower())
+        except Exception as e:
+            print(f"Error performing calculations: {e}")
+            
     recommendations = []
     identified_problems = _identify_problems(crop_type, weather_prediction, soil_data)
 
@@ -59,8 +78,8 @@ def recommend_products(crop_type, weather_prediction, soil_data=None, latitude=N
         probability = len(matching_problems) / len(identified_problems) if identified_problems else 0.5
         accuracy = calculate_accuracy(matching_problems, weather_prediction, soil_data)
 
-        text =generate_recommendation_text(product_name, crop_type, matching_problems, info["description"], weather_prediction)
-
+        text = generate_recommendation_text(product_name, crop_type, matching_problems, info["description"], weather_prediction)
+ 
         recommendations.append({
             "recommended_product": product_name,
             "probability": round(probability, 2),
@@ -68,6 +87,7 @@ def recommend_products(crop_type, weather_prediction, soil_data=None, latitude=N
             "text": text,
             "matching_problems": matching_problems
         })
+        
     recommendations.sort(key=lambda x: x["probability"], reverse=True)
 
     if not recommendations:
