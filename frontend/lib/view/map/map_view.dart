@@ -4,7 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/map/map_controller.dart';
+import 'package:frontend/view/map/create_farm_view.dart';
+import 'package:frontend/view/welcome_survey/models/crops.dart';
 import 'package:maplibre/maplibre.dart';
+import 'package:frontend/view/map/create_farm_view.dart';
 
 @immutable
 class MapView extends StatefulWidget {
@@ -14,13 +17,33 @@ class MapView extends StatefulWidget {
   State<MapView> createState() => _MyMapWidget();
 }
 
+class FarmPoint extends Point {
+  final Crops cropType;
+
+  FarmPoint({
+    required Position coordinates,
+    required this.cropType,
+  }) : super(coordinates: coordinates);
+
+  String get iconKey {
+    switch (cropType) {
+      case Crops.soybean:
+        return 'farm-soybean';
+      case Crops.corn:
+        return 'farm-corn';
+      case Crops.cotton:
+        return 'farm-cotton';
+    }
+  }
+}
+
 class _MyMapWidget extends State<MapView> {
   // Using this field to store the widget state
   MapController? _mapController;
 
   final LocationController _controller = LocationController();
   Position? _currentPosition;
-  final List<Point> _markersPoints = [];
+  final List<FarmPoint> _markersPoints = [];
 
   @override
   void initState() {
@@ -30,18 +53,24 @@ class _MyMapWidget extends State<MapView> {
 
   Future<void> _addCustomImage(StyleController styleController) async {
     try {
-      final ByteData data = await rootBundle.load('assets/images/farm.png'); // Load from assets
-      final Uint8List imageData = data.buffer.asUint8List();
+      // Add all farm type icons
+      final Map<String, String> farmIcons = {
+        'farm-corn': 'assets/images/farm_icons/corn_icon.png',
+        'farm-soybean': 'assets/images/farm_icons/soybean_icon.png',
+        'farm-cotton': 'assets/images/farm_icons/cotton_icon.png',
+      };
 
-      // Ensure `addImage` is awaited
-      await styleController.addImage('custom-marker', imageData);
+      for (var entry in farmIcons.entries) {
+        final ByteData data = await rootBundle.load(entry.value);
+        final Uint8List imageData = data.buffer.asUint8List();
+        await styleController.addImage(entry.key, imageData);
+      }
 
-      print('Custom image added successfully!');
+      print('Farm icons added successfully!');
     } catch (e) {
-      print('Error adding image: $e');
+      print('Error adding images: $e');
     }
   }
-
 
   Future<void> _loadCurrentPosition() async {
     try {
@@ -55,9 +84,12 @@ class _MyMapWidget extends State<MapView> {
     }
   }
 
-  void _addMarker(Position position) {
+  void _addMarker(Position position, Crops cropType) {
     setState(() {
-      _markersPoints.add(Point(coordinates: position));
+      _markersPoints.add(FarmPoint(
+        coordinates: position,
+        cropType: cropType,
+      ));
     });
   }
 
@@ -88,23 +120,40 @@ class _MyMapWidget extends State<MapView> {
         },
         layers: [
           MarkerLayer(
-              points: _markersPoints,
-              iconSize: 0.5,  // Choose a size that works well for your use case
-              iconImage: 'custom-marker',
+            points: _markersPoints.where((p) => p.cropType == Crops.corn).toList(),
+            iconSize: 0.5,
+            iconImage: 'farm-corn',
+          ),
+          MarkerLayer(
+            points: _markersPoints.where((p) => p.cropType == Crops.soybean).toList(),
+            iconSize: 0.1,
+            iconImage: 'farm-soybean',
+          ),
+          MarkerLayer(
+            points: _markersPoints.where((p) => p.cropType == Crops.cotton).toList(),
+            iconSize: 0.3,
+            iconImage: 'farm-cotton',
           ),
         ],
         onEvent: (event) {
           if (event case MapEventClick(:final point)) {
             final position = Position(point.lng, point.lat);
-            _addMarker(position);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Marker added at: ${position.lat.toStringAsFixed(6)}, ${position.lng.toStringAsFixed(6)}',
-                ),
-                duration: const Duration(seconds: 2),
+            Navigator.push<Farm>(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CreateFarmView(position: position),
               ),
-            );
+            ).then((Farm? farm) {
+              if (farm != null) {
+                _addMarker(position, farm.cropType);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Farm "${farm.name}" (${farm.cropType.localized()}) created successfully!'),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            });
           }
         },
       ),

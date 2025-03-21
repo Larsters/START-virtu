@@ -15,7 +15,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,7 +34,7 @@ def soil_conditions(latitude: float, longitude: float):
 
 def serve():
     load_dotenv()
-    uvicorn.run("backend:app", host="127.0.0.1", port=8000)
+    uvicorn.run("backend:app", host="0.0.0.0", port=8000)
 
 
 if __name__ == "__backend__":
