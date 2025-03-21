@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:frontend/models/soil_data.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
 
@@ -90,13 +91,13 @@ class BackendController {
 
 
 
-  static Future<Map<String, dynamic>?> getSoilData(double latitude, double longitude) async {
+  static Future<SoilData> getSoilData(double latitude, double longitude) async {
     BackendController backend = BackendController();
     final result = await backend.get('getSoilData', params:{
       'latitude': latitude,
       'longitude': longitude
     });
-    return result;
+    return SoilData.fromJson(result);
   }
 
   static Future<Map<String, dynamic>?> getWeatherData(double latitude, double longitude) async {
