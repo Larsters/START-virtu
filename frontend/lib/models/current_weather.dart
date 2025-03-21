@@ -19,31 +19,55 @@ class CurrentWeather {
     required this.air_pressure
   });
 
-  // Factory constructor to create SoilData from JSON
+  // Factory constructor to create CurrentWeather from JSON
   factory CurrentWeather.fromJson(Map<String, dynamic> json) {
     return CurrentWeather(
-      latitude: json['latitude'] as double,
-      longitude: json['longitude'] as double,
-      temperature: json['temperature'] as double,
-      temperature_felt: json['temperature_felt'] as double,
-      wind_speed: json['wind_speed'] as double,
-      wind_direction: json['v'] as String,
-      humidity: json['humidity'] as double,
-      air_pressure: json['air_pressure'] as double,
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
+      temperature: double.tryParse(json['temperature'] as String? ?? '0') ?? 0.0,
+      temperature_felt: double.tryParse(json['temperature_felt'] as String? ?? '0') ?? 0.0,
+      wind_speed: double.tryParse(json['wind_speed'] as String? ?? '0') ?? 0.0,
+      wind_direction: json['wind_direction'] as String? ?? 'N/A',
+      humidity: double.tryParse(json['humidity'] as String? ?? '0') ?? 0.0,
+      air_pressure: double.tryParse(json['air_pressure'] as String? ?? '0') ?? 0.0,
     );
   }
 
-  // Method to convert SoilData to JSON
+  // Method to convert to JSON
   Map<String, dynamic> toJson() {
     return {
       'latitude': latitude,
       'longitude': longitude,
-      'temperature': temperature,
-      'temperature_felt': temperature_felt,
-      'wind_speed': wind_speed,
+      'temperature': temperature.toString(),
+      'temperature_felt': temperature_felt.toString(),
+      'wind_speed': wind_speed.toString(),
       'wind_direction': wind_direction,
-      'humidity': humidity,
-      'air_pressure': air_pressure,
+      'humidity': humidity.toString(),
+      'air_pressure': air_pressure.toString(),
     };
   }
+
+  @override
+  String toString() {
+    return '''CurrentWeather{
+      latitude: $latitude,
+      longitude: $longitude,
+      temperature: $temperature,
+      temperature_felt: $temperature_felt,
+      wind_speed: $wind_speed,
+      wind_direction: $wind_direction,
+      humidity: $humidity,
+      air_pressure: $air_pressure
+    }''';
+  }
+
+  // Getters
+  double get getLatitude => latitude;
+  double get getLongitude => longitude;
+  double get getTemperature => temperature;
+  double get getTemperatureFelt => temperature_felt;
+  double get getWindSpeed => wind_speed;
+  String get getWindDirection => wind_direction;
+  double get getHumidity => humidity;
+  double get getAirPressure => air_pressure;
 }
