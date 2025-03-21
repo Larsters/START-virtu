@@ -32,6 +32,18 @@ def soil_conditions(latitude: float, longitude: float):
     return soil_service.fetch_soil_data(latitude, longitude)
 
 
+@app.get("/getStatistics")
+def algorithm_statistics(latitude: float, longitude: float, crop_type: str):
+    stats = {
+        "daytime_heat_stress_risk": ...,
+        "nighttime_heat_stress_risk": ...,
+        "frost_stress": ...,
+        "drough_risk": ...,
+        "yield_risk": ...,
+
+    }
+
+
 def serve():
     load_dotenv()
     uvicorn.run("backend:app", host="127.0.0.1", port=8000)

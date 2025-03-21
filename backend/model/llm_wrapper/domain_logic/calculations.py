@@ -1,34 +1,249 @@
-def calculate_gdd(weather_data, base_temp):
-    """
-    Given a list of dicts: [{tmax, tmin, date}, ...], compute total GDD.
-    GDD for each day = ((Tmax + Tmin)/2) - base_temp, if > 0 else 0
-    """
-    total_gdd = 0
-    for day in weather_data:
-        avg_temp = (day["tmax"] + day["tmin"]) / 2
-        daily_gdd = avg_temp - base_temp
-        if daily_gdd < 0:
-            daily_gdd = 0
-        total_gdd += daily_gdd
-    return round(total_gdd, 2)
+from model.llm_wrapper.services.meteoblue_model import MeteoblueQuery
+import requests
+from datetime import datetime, timedelta
+from model.llm_wrapper.services.soil_service import fetch_soil_data
+from statistics import fmean
+from math import sqrt
+import os
 
-def calculate_yield_risk(crop_type, GDD, Precipitation, pH, N_Actual):
+
+def calculate_daytime_heat_stress_risk(latitude, longitude, crop_type):
+    t_max = get_daily_maximum_temperature(latitude, longitude)
+    t_max_optimum, t_max_limit = get_daytime_optimum_limit_temperature_by_crop(crop_type)
+
+    if t_max <= t_max_optimum:
+        return 0
+    if t_max >= t_max_limit:
+        return 9
+    return 9 * (t_max - t_max_optimum) / (t_max_limit - t_max_optimum)
+
+
+def calculate_nighttime_heat_stress_risk(latitude, longitude, crop_type):
+    t_min = get_daily_minimum_temperature(latitude=latitude, longitude=longitude)
+    t_min_optimum, t_min_limit = get_nighttime_optimum_limit_temperature_by_crop(crop_type)
+
+    if t_min < t_min_optimum:
+        return 0
+    if t_min > t_min_limit:
+        return 9
+    return 9 * (t_min - t_min_optimum) / (t_min_limit - t_min_optimum)
+
+
+def calculate_frost_stress(latitude, longitude, crop_type):
+    t_min = get_daily_minimum_temperature(latitude=latitude, longitude=longitude)
+    t_min_no_frost, t_min_frost = get_frost_minimum_temperatures_by_crop(crop_type)
+    if t_min >= t_min_no_frost:
+        return 0
+    if t_min <= t_min_frost:
+        return 9
+    return 9 * abs(t_min - t_min_frost) / abs(t_min_frost - t_min_no_frost)
+
+
+def get_frost_minimum_temperatures_by_crop(crop_type):
     """
-    Use your existing yield risk formula.
+    Returns touple (t_min_no_frost, t_min_frost
     """
-    crop_optimal_values = {
-        "Soybean": {"GDD_opt": 2700, "P_opt": 575, "pH_opt": 6.4, "N_opt": 0.013},
-        "Corn": {"GDD_opt": 2900, "P_opt": 650, "pH_opt": 6.4, "N_opt": 0.115},
-        "Cotton": {"GDD_opt": 2400, "P_opt": 1000, "pH_opt": 6.3, "N_opt": 0.072},
-    }
+    match crop_type:
+        case "soybean":
+            return 4, -3
+        case "corn":
+            return 4, -3
+        case "cotton":
+            return 4, -3
+
+
+def get_drought_risk(latitude, longitude):
+    start = datetime.now() - timedelta(days=90)
+    end = datetime.now()
+
+    cumulative_rainfall = get_cumulative_rainfall(latitude, longitude, start, end)
+    cumulative_evaporation = get_cumulative_evaporation(latitude, longitude, start, end)
+    soil_moisture = get_soil_moisture(latitude, longitude)
+    average_temperature = get_average_temperature(latitude, longitude, start, end)
+
+    drought_index = (cumulative_rainfall - cumulative_evaporation) + soil_moisture / average_temperature
+    return drought_index
+
+
+def get_yield_risk(latitude, longitude, start, end, crop_type):
+    growing_degree_days = get_growing_degree_days(latitude, longitude, start, end)
+    cumulative_rainfall = get_cumulative_rainfall(latitude, longitude, start, end)
+    soil_ph = get_soil_ph(latitude, longitude)
+    soil_nitrogen = get_soil_nitrogen(latitude, longitude)
+    optimal_growing_degree_days, optimal_rainfall, optimal_soil_ph, optimal_soil_nitrogen = get_yield_risk_optimal_numbers(crop_type=crop_type)
+
     w1, w2, w3, w4 = 0.3, 0.3, 0.2, 0.2
-    opt = crop_optimal_values[crop_type]
 
-    yield_risk = (
-        w1 * (GDD - opt["GDD_opt"])**2 +
-        w2 * (Precipitation - opt["P_opt"])**2 +
-        w3 * (pH - opt["pH_opt"])**2 +
-        w4 * (N_Actual - opt["N_opt"])**2
+    yield_risk = w1 * sqrt((growing_degree_days - optimal_growing_degree_days)) + w2 * sqrt((cumulative_rainfall - optimal_rainfall)) + w3 * sqrt((soil_ph - optimal_soil_ph)) + w4 * sqrt((soil_nitrogen - optimal_soil_nitrogen))
+    return yield_risk
+
+def get_yield_risk_optimal_numbers(crop_type):
+    """
+    Returns touple (optimal_growing_degree_days, optimal_rainfall, optimal_soil_ph, optimal_soil_nitrogen)
+    """
+    match crop_type:
+        case "soybean":
+            return 2700, 575, 6.4, 0.013
+        case "corn":
+            return 2900, 650, 6.4, 0.115
+        case "cotton":
+            return 2400, 1000, 6.3, 0.072
+
+
+def get_soil_ph(latitude, longitude):
+    response = fetch_soil_data(latitude, longitude)
+    return response["soil_ph"]
+
+
+def get_soil_nitrogen(latitude, longitude):
+    response = fetch_soil_data(latitude, longitude)
+    return response["soil_nitrogen_content"]
+
+
+def get_growing_degree_days(latitude, longitude, start, end):
+    query = MeteoblueQuery()
+    query.set_coordinates(latitude=latitude, longitude=longitude)
+    query.set_time_interval(start=start, end=end)
+    query.add_query(domain="ERA5T",
+                    gap_fill_domain=None,
+                    time_resolution="daily",
+                    code_dict={"code": 730,
+                               "level": "2 m above gnd",
+                               "aggregation": "sum",
+                               "gddBase": 8,
+                               "gddLimit": 30}
+                    )
+    response = get_query(query)
+    return sum(filter(None, response[0]["codes"][0]["dataPerTimeInterval"][0]["data"][0]))
+
+
+def get_average_temperature(latitude, longitude, start, end):
+    query = MeteoblueQuery()
+    query.set_coordinates(latitude=latitude, longitude=longitude)
+    query.set_time_interval(start=start, end=end)
+    query.add_query(domain="NEMSGLOBAL",
+                    gap_fill_domain=None,
+                    time_resolution="daily",
+                    code_dict={"code": 11,
+                               "level": "2 m above gnd",
+                               "aggregation": "mean"}
+                    )
+    response = get_query(query)
+    return fmean(response[0]["codes"][0]["dataPerTimeInterval"][0]["data"][0])
+
+
+def get_cumulative_rainfall(latitude, longitude, start, end):
+    """
+    Returns cumulative rainfall over a time period in mm
+    """
+    query = MeteoblueQuery()
+    query.set_coordinates(latitude=latitude, longitude=longitude)
+    query.set_time_interval(start=start, end=end)
+    query.add_query(domain="NEMSGLOBAL",
+                    gap_fill_domain=None,
+                    time_resolution="daily",
+                    code_dict={"code": 61,
+                               "level": "sfc",
+                               "aggregation": "sum"}
+                    )
+    response = get_query(query)
+    return sum(filter(None, response[0]["codes"][0]["dataPerTimeInterval"][0]["data"][0]))
+
+
+def get_cumulative_evaporation(latitude, longitude, start, end):
+    """
+    Returns cumulative evaporation over a time period in mm
+    """
+    query = MeteoblueQuery()
+    query.set_coordinates(latitude=latitude, longitude=longitude)
+    query.set_time_interval(start=start, end=end)
+    query.add_query(domain="NEMSGLOBAL",
+                    gap_fill_domain=None,
+                    time_resolution="daily",
+                    code_dict={"code": 261,
+                               "level": "sfc",
+                               "aggregation": "sum"
+                               })
+    response = get_query(query)
+    return sum(response[0]["codes"][0]["dataPerTimeInterval"][0]["data"][0])
+
+
+def get_soil_moisture(latitude, longitude):
+    """
+    Returns soil moisture in percentage
+    """
+    response = fetch_soil_data(latitude, longitude)
+    print(response)
+    return response["soil_moisture"]
+
+
+def get_daily_maximum_temperature(latitude, longitude):
+    query = MeteoblueQuery()
+    query.set_coordinates(latitude=latitude, longitude=longitude)
+    query.set_time_interval(start=datetime.now() - timedelta(hours=1), end=datetime.now())
+    query.add_query(domain="NEMSGLOBAL",
+                    gap_fill_domain=None,
+                    time_resolution="daily",
+                    code_dict={"code": 11,
+                               "level": "2 m above gnd",
+                               "aggregation": "max"}
+                    )
+    response = get_query(query)
+    return response[0]["codes"][0]["dataPerTimeInterval"][0]["data"][0][0]
+
+
+def get_daily_minimum_temperature(latitude, longitude):
+    query = MeteoblueQuery()
+    query.set_coordinates(latitude=latitude, longitude=longitude)
+    query.set_time_interval(start=datetime.now() - timedelta(hours=1), end=datetime.now())
+    query.add_query(domain="NEMSGLOBAL",
+                    gap_fill_domain=None,
+                    time_resolution="daily",
+                    code_dict={"code": 11,
+                               "level": "2 m above gnd",
+                               "aggregation": "min"}
+                    )
+    response = get_query(query)
+    return response[0]["codes"][0]["dataPerTimeInterval"][0]["data"][0][0]
+
+
+def get_daytime_optimum_limit_temperature_by_crop(crop_type):
+    """
+    Returns tuple (t_max_optimum, t_max_limit)
+    """
+    match crop_type:
+        case "soybean":
+            return 32, 45
+        case "corn":
+            return 33, 44
+        case "cotton":
+            return 32, 38
+
+
+def get_nighttime_optimum_limit_temperature_by_crop(crop_type):
+    """
+    Returns tuple (t_min_optimum, t_min_limit)
+    """
+    match crop_type:
+        case "soybean":
+            return 22, 28
+        case "corn":
+            return 22, 28
+        case "cotton":
+            return 20, 25
+
+
+def get_query(query):
+    response = requests.post(
+        # url=f"https://my.meteoblue.com/dataset/query?apikey={os.getenv('HISTORICAL_API_KEY')}",
+        url=f"https://my.meteoblue.com/dataset/query?apikey=e063b648626d",
+        json=query.body,
+        headers={"Content-Type": "application/json"},
     )
+    return response.json()
 
-    return round(yield_risk, 2)
+
+start = datetime.now() - timedelta(days=90)
+end = datetime.now()
+
+print(get_yield_risk(47.2526, 9.2229, start=start, end=end, crop_type="soybean"))

@@ -59,7 +59,8 @@ def fetch_soil_data(latitude, longitude):
 
 def get_query(query):
     response = requests.post(
-        url=f"https://my.meteoblue.com/dataset/query?apikey={os.getenv('HISTORICAL_API_KEY')}",
+        #url=f"https://my.meteoblue.com/dataset/query?apikey={os.getenv('HISTORICAL_API_KEY')}",
+        url=f"https://my.meteoblue.com/dataset/query?apikey=7b29a207a0de",
         json=query.body,
         headers={"Content-Type": "application/json"},
     )
