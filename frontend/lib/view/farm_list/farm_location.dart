@@ -1,4 +1,4 @@
-import 'package:frontend/view/welcome_survey/models/crops.dart';
+import 'package:frontend/view/farm_list/crops.dart';
 
 class FarmLocation {
   final String name;

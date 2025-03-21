@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:frontend/view/welcome_survey/models/crops.dart';
-import 'package:frontend/view/welcome_survey/models/farm_location.dart';
+import 'package:frontend/view/farm_list/crops.dart';
+import 'package:frontend/view/farm_list/farm_location.dart';
 import 'package:path_provider/path_provider.dart';
 
 class AppDataManager {
