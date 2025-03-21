@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/view/map/map_view.dart';
 import 'package:frontend/view/farm_list/farm_list_view.dart';
+import 'package:frontend/view/map/map_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -11,6 +11,12 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   bool _showMap = false;
+
+  void _toggleView(bool showMap) {
+    setState(() {
+      _showMap = showMap;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +34,7 @@ class _HomeViewState extends State<HomeView> {
                 children: [
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => setState(() => _showMap = false),
+                      onTap: () => _toggleView(false),
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
@@ -59,7 +65,7 @@ class _HomeViewState extends State<HomeView> {
                   ),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => setState(() => _showMap = true),
+                      onTap: () => _toggleView(true),
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
@@ -95,7 +101,11 @@ class _HomeViewState extends State<HomeView> {
           Expanded(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
-              child: _showMap ? const MapView() : const FarmListView(),
+              child: _showMap
+                  ? const MapView()
+                  : FarmListView(
+                onOpenMap: () => _toggleView(true),
+              ),
             ),
           ),
         ],
