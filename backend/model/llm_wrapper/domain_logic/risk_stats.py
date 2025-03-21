@@ -19,19 +19,19 @@ WORST_YIELD_RISK = ">1000"
 
 
 def get_stats(latitude, longitude, crop_type):
-    daytime_heat_stress_risk = round(
+    daytime_heat_stress_risk = str(round(
         get_daytime_heat_stress_risk(latitude, longitude, crop_type), 2
-    )
+    ))
 
-    nighttime_heat_stress_risk = round(
+    nighttime_heat_stress_risk = str(round(
         get_nighttime_heat_stress_risk(latitude, longitude, crop_type), 2
-    )
+    ))
 
-    frost_stress = round(get_frost_stress(latitude, longitude, crop_type), 2)
+    frost_stress = str(round(get_frost_stress(latitude, longitude, crop_type), 2))
 
-    drought_risk = round(get_drought_risk(latitude, longitude), 2)
+    drought_risk = str(round(get_drought_risk(latitude, longitude), 2))
 
-    yield_risk = round(get_yield_risk(latitude, longitude, crop_type), 2)
+    yield_risk = str(round(get_yield_risk(latitude, longitude, crop_type), 2))
 
     stats = {
         "daytime_heat_stress_risk": [
