@@ -37,7 +37,7 @@ def fetch_soil_data(latitude, longitude):
     )
     query.add_query(
         domain="SOILGRIDS2",
-        gap_fill_domain="NEMSGLOBAL",
+        gap_fill_domain="SOILGRIDS2_1000",
         time_resolution="static",
         code_dict={
             "code": 817,
@@ -48,7 +48,9 @@ def fetch_soil_data(latitude, longitude):
     )
     response = get_query(query)
     parsed = {
-        "soil_moisture": response[0]["codes"][0]["dataPerTimeInterval"][0]["data"][0][0],
+        "soil_moisture": response[0]["codes"][0]["dataPerTimeInterval"][0]["data"][0][
+            0
+        ],
         "soil_ph": response[1]["codes"][0]["dataPerTimeInterval"][0]["data"][0][0],
         "soil_nitrogen_content": response[2]["codes"][0]["dataPerTimeInterval"][0][
             "data"
