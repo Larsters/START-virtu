@@ -3,7 +3,7 @@ enum RiskType {
   nightHeating('Night Heating', 'Temperature during night'),
   frost('Frost Risk', 'Risk of frost damage'),
   drought('Drought Risk', 'Risk of drought'),
-  yield('Yield Risk', 'Expected yield risk');
+  yiel('Yield Risk', 'Expected yield risk');
 
   final String displayName;
   final String description;

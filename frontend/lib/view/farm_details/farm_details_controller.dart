@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/view/debug/debug_controller.dart';
 import 'package:frontend/view/farm_details/models/product.dart';
 import 'package:frontend/view/farm_details/models/risk.dart';
 import 'package:frontend/view/farm_details/models/risk_type.dart';
@@ -27,49 +28,55 @@ class HarvestData {
 
 class FarmDetailsController extends ChangeNotifier {
   final String farmName;
-  final CropType? cropType;
+  CropType? _cropType;
   final double latitude;
   final double longitude;
-  final List<Risk> risks;
-  final List<Product> recommendedProducts;
+  List<Risk> _risks;
+  List<Product> _recommendedProducts;
   final List<ProductUsage> usedProducts;
   HarvestData? lastHarvestData;
 
+  CropType? get cropType => _cropType;
+
+  List<Risk> get risks => _risks;
+
+  List<Product> get recommendedProducts => _recommendedProducts;
+
   FarmDetailsController({
     required this.farmName,
-    required this.cropType,
+    required CropType? cropType,
     required this.latitude,
     required this.longitude,
-  }) : risks =
-           cropType == null
-               ? []
-               : [
-                 Risk(
-                   type: RiskType.dayHeating,
-                   value: 28.5,
-                   min: 20.0,
-                   max: 30.0,
-                 ),
-                 Risk(
-                   type: RiskType.nightHeating,
-                   value: 15.0,
-                   min: 12.0,
-                   max: 18.0,
-                 ),
-                 Risk(type: RiskType.frost, value: 2.0, min: 0.0, max: 5.0),
-                 Risk(
-                   type: RiskType.drought,
-                   value: 75.0,
-                   min: 40.0,
-                   max: 60.0,
-                 ),
-                 Risk(type: RiskType.yield, value: 85.0, min: 70.0, max: 100.0),
-               ],
-       recommendedProducts =
-           cropType == null
-               ? []
-               : [Product.stressBooster, Product.nutrientBooster],
-       usedProducts = [];
+  })
+      : _cropType = cropType,
+        _risks = cropType == null
+            ? []
+            : [
+          Risk(
+            type: RiskType.dayHeating,
+            value: 28.5,
+            min: 20.0,
+            max: 30.0,
+          ),
+          Risk(
+            type: RiskType.nightHeating,
+            value: 15.0,
+            min: 12.0,
+            max: 18.0,
+          ),
+          Risk(type: RiskType.frost, value: 2.0, min: 0.0, max: 5.0),
+          Risk(
+            type: RiskType.drought,
+            value: 75.0,
+            min: 40.0,
+            max: 60.0,
+          ),
+          Risk(type: RiskType.yiel, value: 85.0, min: 70.0, max: 100.0),
+        ],
+        _recommendedProducts = cropType == null
+            ? []
+            : [Product.stressBooster, Product.nutrientBooster],
+        usedProducts = [];
 
   // Get recommended products that haven't been used yet
   List<Product> get activeRecommendedProducts {
@@ -81,6 +88,9 @@ class FarmDetailsController extends ChangeNotifier {
 
   bool get isHarvestTime {
     if (cropType == null) return false;
+
+    // Check debug override first
+    if (DebugController().forceHarvestTime) return true;
 
     final now = DateTime.now();
     final month = now.month;
@@ -106,13 +116,39 @@ class FarmDetailsController extends ChangeNotifier {
       usedProducts: List.from(usedProducts),
     );
     // Clear current crop data
+    _cropType = null;
+    _risks = [];
+    _recommendedProducts = [];
     usedProducts.clear();
     notifyListeners();
   }
 
   Future<void> plantNewCrop(CropType crop) async {
-    // TODO: Implement saving the new crop to persistent storage
-    debugPrint('Planting new crop: ${crop.displayName}');
+    _cropType = crop;
+    _risks = [
+      Risk(
+        type: RiskType.dayHeating,
+        value: 28.5,
+        min: 20.0,
+        max: 30.0,
+      ),
+      Risk(
+        type: RiskType.nightHeating,
+        value: 15.0,
+        min: 12.0,
+        max: 18.0,
+      ),
+      Risk(type: RiskType.frost, value: 2.0, min: 0.0, max: 5.0),
+      Risk(
+        type: RiskType.drought,
+        value: 75.0,
+        min: 40.0,
+        max: 60.0,
+      ),
+      Risk(type: RiskType.yiel, value: 85.0, min: 70.0, max: 100.0),
+    ];
+    _recommendedProducts = [Product.stressBooster, Product.nutrientBooster];
+    lastHarvestData = null;
     notifyListeners();
   }
 }

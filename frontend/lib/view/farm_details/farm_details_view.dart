@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/view/debug/debug_view.dart';
 import 'package:frontend/view/farm_details/farm_details_controller.dart';
 import 'package:frontend/view/farm_details/models/product.dart';
 import 'package:frontend/view/farm_details/widgets/alerts_section.dart';
@@ -39,6 +40,16 @@ class FarmDetailsView extends StatelessWidget {
           backgroundColor: Colors.transparent,
           elevation: 0,
           actions: [
+            IconButton(
+              icon: const Icon(Icons.bug_report),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const DebugView(),
+                  ),
+                );
+              },
+            ),
             if (cropType != null)
               Consumer<FarmDetailsController>(
                 builder:
@@ -107,12 +118,12 @@ class FarmDetailsView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        FarmHeader(
-                          farmName: farmName,
-                          cropType: cropType!,
-                          healthScore: healthScore,
-                        ),
-                        if (cropType != null) ...[
+                        if (controller.cropType != null) ...[
+                          FarmHeader(
+                            farmName: farmName,
+                            cropType: controller.cropType!,
+                            healthScore: healthScore,
+                          ),
                           const SizedBox(height: 24),
                           const AlertsSection(),
                           const SizedBox(height: 24),
@@ -120,9 +131,46 @@ class FarmDetailsView extends StatelessWidget {
                           const SizedBox(height: 24),
                           const RisksSection(),
                         ] else if (controller.lastHarvestData != null) ...[
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Colors.green.withOpacity(0.1),
+                                  Colors.blue.withOpacity(0.1),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              children: [
+                                const Icon(
+                                  Icons.check_circle_outline,
+                                  size: 48,
+                                  color: Colors.green,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Season Complete',
+                                  style:
+                                      Theme.of(
+                                        context,
+                                      ).textTheme.headlineMedium,
+                                ),
+                                Text(
+                                  farmName,
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(color: Colors.grey[600]),
+                                ),
+                              ],
+                            ),
+                          ),
                           const SizedBox(height: 24),
                           _LastHarvestInfo(data: controller.lastHarvestData!),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 32),
                           Center(
                             child: FilledButton.icon(
                               onPressed: () => _showCropSelector(context),

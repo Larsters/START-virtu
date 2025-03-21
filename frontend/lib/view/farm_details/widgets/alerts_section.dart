@@ -66,7 +66,7 @@ class _HarvestAlert extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
-                onPressed: () => _showHarvestSurvey(context),
+                onPressed: () => _showHarvestSurvey(context, controller),
                 icon: const Icon(Icons.check_circle_outline),
                 label: const Text('Record Harvest'),
               ),
@@ -77,17 +77,17 @@ class _HarvestAlert extends StatelessWidget {
     );
   }
 
-  Future<void> _showHarvestSurvey(BuildContext context) async {
-    final controller = Provider.of<FarmDetailsController>(
-      context,
-      listen: false,
-    );
-
+  Future<void> _showHarvestSurvey(
+    BuildContext context,
+    FarmDetailsController controller,
+  ) async {
     await showDialog<void>(
       context: context,
       builder:
-          (context) =>
-              _HarvestSurveyDialog(usedProducts: controller.usedProducts),
+          (context) => ChangeNotifierProvider.value(
+            value: controller,
+            child: _HarvestSurveyDialog(usedProducts: controller.usedProducts),
+          ),
     );
   }
 }
