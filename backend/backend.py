@@ -38,6 +38,11 @@ def algorithm_statistics(latitude: float, longitude: float, crop: str):
     return get_stats(latitude, longitude, crop)
 
 
+@app.get("/getCloudiness")
+def cloudiness(latitude: float, longitude: float):
+    return current_weather_service.get_cloudiness(latitude, longitude)
+
+
 def serve():
     load_dotenv()
     uvicorn.run("backend:app", host="0.0.0.0", port=8000)

@@ -19,6 +19,15 @@ class Farm {
     this.hasRisk = false,
   });
 
+  // Getters
+  String get getName => name;
+  CropType get getCropType => type;
+  double get getLatitude => latitude;
+  double get getLongitude => longitude;
+  int get getHealthScore => healthScore;
+  String? get getAlert => alert;
+  bool get getHasRisk => hasRisk;
+
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -42,4 +51,5 @@ class Farm {
       hasRisk: json['hasRisk'] as bool? ?? false,
     );
   }
+
 }
