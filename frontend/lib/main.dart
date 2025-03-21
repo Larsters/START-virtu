@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/controllers/farm_data_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/services/preferences_manager.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/view/home/home_view.dart';
 import 'package:frontend/view/welcome_survey/welcome_survey_view.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,12 +18,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Syngenta',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      home: const AppStartupRouter(),
+    return ChangeNotifierProvider(
+      create: (_) => FarmDataController(),
+      child: MaterialApp(
+        title: 'Syngenta',
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        home: const AppStartupRouter(),
+      ),
     );
   }
 }

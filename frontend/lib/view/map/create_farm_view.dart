@@ -1,20 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/farm.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/theme/constants.dart';
 import 'package:frontend/view/farm_list/crop_type.dart';
 import 'package:maplibre/maplibre.dart';
-
-class Farm {
-  final String name;
-  final CropType cropType;
-  final Position position;
-
-  Farm({
-    required this.name,
-    required this.cropType,
-    required this.position,
-  });
-}
 
 class CreateFarmView extends StatefulWidget {
   final Position position;
@@ -144,7 +133,7 @@ class _CreateFarmViewState extends State<CreateFarmView> {
                                   SizedBox(width: Spacings.l),
                                   Expanded(
                                     child: Text(
-                                      crop.localized(),
+                                      crop.displayName,
                                       style: Theme.of(context).textTheme.titleLarge
                                           ?.copyWith(color: AppTheme.darkColor),
                                     ),
@@ -174,11 +163,13 @@ class _CreateFarmViewState extends State<CreateFarmView> {
                           if (_formKey.currentState!.validate()) {
                             final farm = Farm(
                               name: _nameController.text,
-                              cropType: _selectedCrop!,
-                              position: widget.position,
-                            );
-                            Navigator.pop(context, farm);
-                          }
+                                type: _selectedCrop!,
+                                latitude: widget.position.lat as double,
+                                longitude: widget.position.lng as double,
+                                healthScore: 85, // Default health score
+                              );
+                              Navigator.pop(context, farm);
+                            }
                         }
                       : null,
                   child: const Padding(

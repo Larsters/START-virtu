@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frontend/services/app_data_manager.dart';
+import 'package:frontend/controllers/farm_data_controller.dart';
+import 'package:frontend/models/farm.dart';
 import 'package:frontend/view/farm_list/crop_type.dart';
-import 'package:frontend/view/farm_list/farm_location.dart';
 import 'package:frontend/view/map/create_farm_view.dart';
 import 'package:frontend/view/map/map_controller.dart';
 import 'package:maplibre/maplibre.dart';
+import 'package:provider/provider.dart';
 
 @immutable
 class MapView extends StatefulWidget {
@@ -38,24 +39,18 @@ class FarmPoint extends Point {
 }
 
 class _MyMapWidget extends State<MapView> {
-  // Using this field to store the widget state
   MapController? _mapController;
-
-  final LocationController _controller = LocationController();
-  final AppDataManager _appDataManager = AppDataManager();
+  final LocationController _locationController = LocationController();
   Position? _currentPosition;
-  final List<FarmPoint> _markersPoints = [];
 
   @override
   void initState() {
     super.initState();
     _loadCurrentPosition();
-    _loadSavedFarms();
   }
 
   Future<void> _addCustomImage(StyleController styleController) async {
     try {
-      // Add all farm type icons
       final Map<String, String> farmIcons = {
         'farm-corn': 'assets/images/farm_icons/corn_icon.png',
         'farm-soybean': 'assets/images/farm_icons/soybean_icon.png',
@@ -67,71 +62,67 @@ class _MyMapWidget extends State<MapView> {
         final Uint8List imageData = data.buffer.asUint8List();
         await styleController.addImage(entry.key, imageData);
       }
-
-      print('Farm icons added successfully!');
     } catch (e) {
-      print('Error adding images: $e');
+      debugPrint('Error adding images: $e');
     }
   }
 
   Future<void> _loadCurrentPosition() async {
     try {
-      final position = await _controller.getCurrentPosition();
+      final position = await _locationController.getCurrentPosition();
       setState(() {
         _currentPosition = position;
       });
     } catch (e) {
-      // Handle error - maybe show a dialog to the user
-      print('Error getting location: $e');
+      debugPrint('Error getting location: $e');
     }
   }
 
-  Future<void> _loadSavedFarms() async {
-    try {
-      final farmLocations = await _appDataManager.loadFarmLocations();
-      setState(() {
-        for (var entry in farmLocations.entries) {
-          for (var location in entry.value) {
-            _markersPoints.add(FarmPoint(
-              coordinates: Position(location.longitude, location.latitude),
-              cropType: entry.key, name: location.name,
-            ));
-          }
-        }
-      });
-    } catch (e) {
-      print('Error loading saved farms: $e');
+  String _getIconKey(CropType cropType) {
+    switch (cropType) {
+      case CropType.soybean:
+        return 'farm-soybean';
+      case CropType.corn:
+        return 'farm-corn';
+      case CropType.cotton:
+        return 'farm-cotton';
     }
   }
 
-  void _addMarker(Position position, CropType cropType, String name) {
-    setState(() {
-      _markersPoints.add(FarmPoint(
-        coordinates: position,
-        cropType: cropType, name: name,
-      ));
-    });
-    
-    // Save the updated farms
-    _saveFarms();
-  }
+  Future<void> _showDeleteConfirmation(BuildContext context, Farm farm) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) =>
+          AlertDialog(
+            title: const Text('Delete Farm'),
+            content: Text('Are you sure you want to delete "${farm.name}"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+    );
 
-  Future<void> _saveFarms() async {
-    try {
-      // Convert FarmPoints to a Map<Crops, List<FarmLocation>>
-      final Map<CropType, List<FarmLocation>> farmLocations = {};
-      
-      for (var point in _markersPoints) {
-        farmLocations.putIfAbsent(point.cropType, () => []);
-        farmLocations[point.cropType]!.add(FarmLocation(
-          latitude: point.coordinates.lat as double,
-          longitude: point.coordinates.lng as double, name: point.name, crop: point.cropType,
-        ));
+    if (confirmed == true && context.mounted) {
+      final controller = Provider.of<FarmDataController>(
+        context,
+        listen: false,
+      );
+      await controller.deleteFarm(farm);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Farm "${farm.name}" deleted successfully'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
-      
-      await _appDataManager.saveFarmLocations(farmLocations);
-    } catch (e) {
-      print('Error saving farms: $e');
     }
   }
 
@@ -141,69 +132,80 @@ class _MyMapWidget extends State<MapView> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Scaffold(
-      body: MapLibreMap(
-        options: MapOptions(
-          initCenter: _currentPosition,
-          initZoom: 15, // Zooming in more since we're showing user's location
-          initStyle: 'https://tiles.openfreemap.org/styles/liberty',
-          gestures: MapGestures(
-            rotate: false,
-            pan: true,
-            zoom: true,
-            pitch: true,
-          ),
-        ),
-        onMapCreated: (controller) {
-          _mapController = controller;
-        },
-        onStyleLoaded: (StyleController styleController) {
-          _addCustomImage(styleController);
-        },
-        layers: [
-          MarkerLayer(
-            points: _markersPoints
-                .where((p) => p.cropType == CropType.corn)
-                .toList(),
-            iconSize: 0.5,
-            iconImage: 'farm-corn',
-          ),
-          MarkerLayer(
-            points: _markersPoints
-                .where((p) => p.cropType == CropType.soybean)
-                .toList(),
-            iconSize: 0.1,
-            iconImage: 'farm-soybean',
-          ),
-          MarkerLayer(
-            points: _markersPoints
-                .where((p) => p.cropType == CropType.cotton)
-                .toList(),
-            iconSize: 0.3,
-            iconImage: 'farm-cotton',
-          ),
-        ],
-        onEvent: (event) {
-          if (event case MapEventClick(:final point)) {
-            final position = Position(point.lng, point.lat);
-            Navigator.push<Farm>(
-              context,
-              MaterialPageRoute(
-                builder: (context) => CreateFarmView(position: position),
+    return Consumer<FarmDataController>(
+      builder: (context, farmController, _) =>
+          Scaffold(
+            body: MapLibreMap(
+              options: MapOptions(
+                initCenter: _currentPosition,
+                initZoom: 15,
+                initStyle: 'https://tiles.openfreemap.org/styles/liberty',
+                gestures: MapGestures(
+                  rotate: false,
+                  pan: true,
+                  zoom: true,
+                  pitch: true,
+                ),
               ),
-            ).then((Farm? farm) {
-              if (farm != null) {
-                _addMarker(position, farm.cropType, farm.name);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Farm "${farm.name}" (${farm.cropType.localized()}) created successfully!'),
-                    duration: const Duration(seconds: 2),
+              onMapCreated: (controller) {
+                _mapController = controller;
+              },
+              onStyleLoaded: _addCustomImage,
+              layers: [
+                for (final cropType in CropType.values)
+                  MarkerLayer(
+                    points: farmController.getFarmsByCrop(cropType)
+                        .map((farm) =>
+                        Point(
+                          coordinates: Position(farm.longitude, farm.latitude),
+                        ))
+                        .toList(),
+                    iconSize: cropType == CropType.soybean
+                        ? 0.1
+                        : cropType == CropType.cotton
+                        ? 0.3
+                        : 0.5,
+                    iconImage: _getIconKey(cropType),
                   ),
-                );
-              }
-            });
-          }
-        },
+              ],
+              onEvent: (event) async {
+                if (event case MapEventClick(:final point)) {
+                  // Check if clicked on an existing farm
+                  final clickedFarm = farmController.getFarmByLocation(
+                    point.lat as double,
+                    point.lng as double,
+                  );
+
+                  if (clickedFarm != null) {
+                    // Show delete option on long press
+                    await _showDeleteConfirmation(context, clickedFarm);
+                  } else {
+                    // Create new farm
+                    final position = Position(point.lng, point.lat);
+                    final Farm? newFarm = await Navigator.push<Farm>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            CreateFarmView(position: position),
+                      ),
+                    );
+
+                    if (newFarm != null && context.mounted) {
+                      await farmController.addFarm(newFarm);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Farm "${newFarm.name}" (${newFarm.type
+                                .displayName}) created successfully!',
+                          ),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  }
+                }
+              },
+            ),
       ),
     );
   }

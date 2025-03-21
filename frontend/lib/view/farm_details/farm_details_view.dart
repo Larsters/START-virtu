@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/controllers/farm_data_controller.dart';
 import 'package:frontend/view/debug/debug_view.dart';
 import 'package:frontend/view/farm_details/farm_details_controller.dart';
 import 'package:frontend/view/farm_details/models/product.dart';
@@ -24,6 +25,47 @@ class FarmDetailsView extends StatelessWidget {
     required this.longitude,
     required this.healthScore,
   });
+
+  Future<void> _showDeleteConfirmation(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Delete Farm'),
+            content: Text('Are you sure you want to delete "$farmName"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final controller = Provider.of<FarmDataController>(
+        context,
+        listen: false,
+      );
+      final farm = controller.getFarmByLocation(latitude, longitude);
+      if (farm != null) {
+        await controller.deleteFarm(farm);
+        if (context.mounted) {
+          Navigator.of(context).pop(); // Go back to previous screen
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Farm "$farmName" deleted successfully'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +149,27 @@ class FarmDetailsView extends StatelessWidget {
                       },
                     ),
               ),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert),
+              itemBuilder:
+                  (context) => [
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('Delete Farm'),
+                        ],
+                      ),
+                    ),
+                  ],
+              onSelected: (value) {
+                if (value == 'delete') {
+                  _showDeleteConfirmation(context);
+                }
+              },
+            ),
           ],
         ),
         body: SafeArea(
